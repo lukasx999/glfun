@@ -3,6 +3,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <span>
 
 #define GLAD_GL_IMPLEMENTATION
 #include "glad/gl.h"
@@ -11,8 +12,12 @@
 #include <GLFW/glfw3.h>
 
 #include "glm/glm.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/rotate_vector.hpp"
 
 
+
+#define ARRAY_LEN(xs) (sizeof(xs) / sizeof *(xs))
 
 constexpr const char *shader_vert = "vert.glsl";
 constexpr const char *shader_frag = "frag.glsl";
@@ -70,10 +75,6 @@ GLuint setup_program(const char *file_vert, const char *file_frag) {
     return program;
 }
 
-void process_inputs(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, 1);
-}
 
 GLFWwindow *setup_window() {
 
@@ -130,6 +131,23 @@ public:
     {}
 };
 
+void transform(Vertex *v, size_t size) {
+    for (size_t i=0; i < size; ++i) {
+        glm::vec3 &pos = v[i].m_pos;
+
+        glm::mat4 rotationMat(1);
+        rotationMat = glm::rotate(rotationMat, 45.0f, glm::vec3(0.0, 0.0, 1.0));
+        pos = glm::vec3(rotationMat * glm::vec4(pos, 1.0));
+    }
+}
+
+void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        transform(vertices, v_size);
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, 1);
+}
 
 
 int main() {
@@ -144,43 +162,42 @@ int main() {
         Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN)
     };
 
-
     GLFWwindow *window = setup_window();
     GLuint program = setup_program(shader_vert, shader_frag);
 
+
     unsigned int vao;
     glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
 
     unsigned int vbo;
     glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    int pos_location = glGetAttribLocation(program, "pos");
-    glVertexAttribPointer(pos_location, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
-    glEnableVertexAttribArray(pos_location);
-
-    int col_location = glGetAttribLocation(program, "col");
-    glVertexAttribPointer(col_location, 3, GL_FLOAT, false, sizeof(Vertex), (void*) offsetof(Vertex, m_color));
-    glEnableVertexAttribArray(col_location);
 
 
-
-
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+    glUseProgram(program);
+    glBindVertexArray(vao);
 
     while (!glfwWindowShouldClose(window)) {
 
-        process_inputs(window);
-
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glUseProgram(program);
         glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        int pos_loc = glGetAttribLocation(program, "pos");
+        glVertexAttribPointer(pos_loc, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
+        glEnableVertexAttribArray(pos_loc);
+
+        int col_loc = glGetAttribLocation(program, "col");
+        glVertexAttribPointer(col_loc, 3, GL_FLOAT, false, sizeof(Vertex), (void*) offsetof(Vertex, m_color));
+        glEnableVertexAttribArray(col_loc);
+
+
+        glClear(GL_COLOR_BUFFER_BIT);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        process_inputs(window, vertices, ARRAY_LEN(vertices));
 
         glfwSwapBuffers(window);
         glfwPollEvents();
