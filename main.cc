@@ -139,28 +139,37 @@ int main() {
         Vertex( 0.5f, -0.5f, 0.0f, Color::RED),
         Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN),
 
-        // Vertex( 0.5f, -0.5f, 0.0f),
-        // Vertex(-0.5f, -0.5f, 0.0f),
-        // Vertex(-0.5f,  0.5f, 0.0f)
+        Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),
+        Vertex(-0.5f, -0.5f, 0.0f, Color::RED),
+        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN)
     };
 
 
     GLFWwindow *window = setup_window();
+    GLuint program = setup_program(shader_vert, shader_frag);
 
     unsigned int vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
-    glEnableVertexAttribArray(0);
 
     unsigned int vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    int pos_location = glGetAttribLocation(program, "pos");
+    glVertexAttribPointer(pos_location, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
+    glEnableVertexAttribArray(pos_location);
 
-    GLuint program = setup_program(shader_vert, shader_frag);
+    int col_location = glGetAttribLocation(program, "col");
+    glVertexAttribPointer(col_location, 3, GL_FLOAT, false, sizeof(Vertex), (void*) offsetof(Vertex, m_color));
+    glEnableVertexAttribArray(col_location);
+
+
+
+
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -171,7 +180,7 @@ int main() {
 
         glUseProgram(program);
         glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
