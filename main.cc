@@ -131,12 +131,12 @@ public:
     {}
 };
 
-void transform(Vertex *v, size_t size) {
+void rotate(Vertex *v, size_t size) {
     for (size_t i=0; i < size; ++i) {
         glm::vec3 &pos = v[i].m_pos;
 
         glm::mat4 rotationMat(1);
-        rotationMat = glm::rotate(rotationMat, 45.0f, glm::vec3(0.3, 0.3, 0.1));
+        rotationMat = glm::rotate(rotationMat, 0.01f, glm::vec3(1.0, 1.0, 0.0));
         pos = glm::vec3(rotationMat * glm::vec4(pos, 1.0));
     }
 }
@@ -154,8 +154,9 @@ bool is_key_pressed(GLFWwindow *window, int key) {
 
 void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 
-    if (is_key_pressed(window, GLFW_KEY_J))
-        transform(vertices, v_size);
+    // if (is_key_pressed(window, GLFW_KEY_J))
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        rotate(vertices, v_size);
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
@@ -171,8 +172,43 @@ int main() {
 
         Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),
         Vertex(-0.5f, -0.5f, 0.0f, Color::RED),
-        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN)
+        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN),
+
+
+        Vertex( 0.5f,  0.5f, 1.0f, Color::BLUE),
+        Vertex( 0.5f, -0.5f, 1.0f, Color::BLUE),
+        Vertex(-0.5f,  0.5f, 1.0f, Color::BLUE),
+
+        Vertex( 0.5f, -0.5f, 1.0f, Color::RED),
+        Vertex(-0.5f, -0.5f, 1.0f, Color::RED),
+        Vertex(-0.5f,  0.5f, 1.0f, Color::RED),
+
+
+
+        Vertex( 0.5f,  0.5f, 0.0f, Color::GREEN),
+        Vertex( 0.5f, -0.5f, 0.0f, Color::GREEN),
+        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN),
+
+        Vertex( 0.5f, -0.5f, 0.0f, Color::GREEN),
+        Vertex(-0.5f, -0.5f, 0.0f, Color::GREEN),
+        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN),
     };
+
+    for (size_t i=12; i < ARRAY_LEN(vertices); ++i) {
+        glm::vec3 &pos = vertices[i].m_pos;
+
+        glm::mat4 rotationMat(1);
+        rotationMat = glm::rotate(rotationMat, 90.0f, glm::vec3(0.0, 1.0, 0.0));
+        pos = glm::vec3(rotationMat * glm::vec4(pos, 1.0));
+    }
+
+    // scale down
+    for (size_t i=0; i < ARRAY_LEN(vertices); ++i) {
+        glm::vec3 &pos = vertices[i].m_pos;
+        pos = pos * 0.5f;
+    }
+
+
 
     GLFWwindow *window = setup_window();
     GLuint program = setup_program(shader_vert, shader_frag);
@@ -207,7 +243,7 @@ int main() {
 
 
         glClear(GL_COLOR_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, 18);
 
         process_inputs(window, vertices, ARRAY_LEN(vertices));
 
