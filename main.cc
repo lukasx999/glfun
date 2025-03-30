@@ -6,9 +6,13 @@
 
 #define GLAD_GL_IMPLEMENTATION
 #include "glad/gl.h"
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include "linmath.h"
+
+#include "glm/glm.hpp"
+
+
 
 constexpr const char *shader_vert = "vert.glsl";
 constexpr const char *shader_frag = "frag.glsl";
@@ -16,10 +20,6 @@ constexpr int width = 1600;
 constexpr int height = 900;
 
 
-void process_inputs(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, 1);
-}
 
 std::string read_entire_file(const char *filename) {
     std::ifstream file(filename);
@@ -33,12 +33,20 @@ GLuint setup_shader(GLenum type, const char *filename) {
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &shader_src_raw, nullptr);
     glCompileShader(shader);
+
+    int success;
+    char info_log[512] = { 0 };
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+    if (!success) {
+        glGetShaderInfoLog(shader, sizeof(info_log), nullptr, info_log);
+        std::println(stderr, "{}: Shader Compilation failed: {}", filename, info_log);
+    }
+
     return shader;
 }
 
 GLuint setup_program(const char *file_vert, const char *file_frag) {
-
-    // TODO: check for shader compile/link errors
 
     GLuint vert = setup_shader(GL_VERTEX_SHADER, file_vert);
     GLuint frag = setup_shader(GL_FRAGMENT_SHADER, file_frag);
@@ -50,17 +58,24 @@ GLuint setup_program(const char *file_vert, const char *file_frag) {
     glDeleteShader(vert);
     glDeleteShader(frag);
 
+    int success;
+    char info_log[512] = { 0 };
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        glGetProgramInfoLog(program, sizeof(info_log), nullptr, info_log);
+        std::println(stderr, "Shader Program Linkage failed: {}", info_log);
+    }
+
     return program;
 }
 
+void process_inputs(GLFWwindow *window) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, 1);
+}
 
-int main() {
-
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
-    };
+GLFWwindow *setup_window() {
 
     if (!glfwInit())
         exit(EXIT_FAILURE);
@@ -87,8 +102,28 @@ int main() {
         }
     );
 
+    return window;
+}
 
 
+
+struct Vertex {
+    float pos[3];
+public:
+    Vertex(float x, float y, float z) : pos{x, y, z} {}
+};
+
+
+
+int main() {
+
+    Vertex vertices[] = {
+        Vertex(-0.5f, -0.5f, 0.0f),
+        Vertex(0.5f, -0.5f, 0.0f),
+        Vertex(0.0f,  0.5f, 0.0f)
+    };
+
+    GLFWwindow *window = setup_window();
 
     unsigned int vao;
     glGenVertexArrays(1, &vao);
@@ -98,7 +133,7 @@ int main() {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(float) * 3, nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
     glEnableVertexAttribArray(0);
 
 
@@ -110,7 +145,6 @@ int main() {
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
 
         glUseProgram(program);
         glBindVertexArray(vao);
