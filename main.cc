@@ -136,13 +136,25 @@ void transform(Vertex *v, size_t size) {
         glm::vec3 &pos = v[i].m_pos;
 
         glm::mat4 rotationMat(1);
-        rotationMat = glm::rotate(rotationMat, 45.0f, glm::vec3(0.0, 0.0, 1.0));
+        rotationMat = glm::rotate(rotationMat, 45.0f, glm::vec3(0.3, 0.3, 0.1));
         pos = glm::vec3(rotationMat * glm::vec4(pos, 1.0));
     }
 }
 
+bool is_key_pressed(GLFWwindow *window, int key) {
+
+    static bool old = false;
+    bool pressed = glfwGetKey(window, key) == GLFW_PRESS;
+
+    bool ret = !old && pressed;
+
+    old = pressed;
+    return ret;
+}
+
 void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
-    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+
+    if (is_key_pressed(window, GLFW_KEY_J))
         transform(vertices, v_size);
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
