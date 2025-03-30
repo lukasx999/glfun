@@ -105,12 +105,29 @@ GLFWwindow *setup_window() {
     return window;
 }
 
+enum class Color {
+    RED,
+    BLUE,
+    GREEN,
+};
 
+glm::vec3 color_to_vec3(Color color) {
+    switch (color) {
+        case Color::RED:   return glm::vec3(1.0f, 0.0f, 0.0f);
+        case Color::BLUE:  return glm::vec3(0.0f, 0.0f, 1.0f);
+        case Color::GREEN: return glm::vec3(0.0f, 1.0f, 0.0f);
+        default:           assert(!"unknown color");
+    }
+}
 
 struct Vertex {
-    float pos[3];
+    glm::vec3 m_pos;
+    glm::vec3 m_color;
 public:
-    Vertex(float x, float y, float z) : pos{x, y, z} {}
+    Vertex(float x, float y, float z, Color color)
+    : m_pos(x, y, z)
+    , m_color(color_to_vec3(color))
+    {}
 };
 
 
@@ -118,24 +135,30 @@ public:
 int main() {
 
     Vertex vertices[] = {
-        Vertex(-0.5f, -0.5f, 0.0f),
-        Vertex(0.5f, -0.5f, 0.0f),
-        Vertex(0.0f,  0.5f, 0.0f)
+        Vertex( 0.5f,  0.5f, 0.0f, Color::BLUE),
+        Vertex( 0.5f, -0.5f, 0.0f, Color::RED),
+        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN),
+
+        // Vertex( 0.5f, -0.5f, 0.0f),
+        // Vertex(-0.5f, -0.5f, 0.0f),
+        // Vertex(-0.5f,  0.5f, 0.0f)
     };
+
 
     GLFWwindow *window = setup_window();
 
     unsigned int vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
+    glEnableVertexAttribArray(0);
 
     unsigned int vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
-    glEnableVertexAttribArray(0);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     GLuint program = setup_program(shader_vert, shader_frag);
 
