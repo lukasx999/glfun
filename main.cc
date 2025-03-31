@@ -1,8 +1,10 @@
+#include <iostream>
 #include <print>
 #include <fstream>
 #include <vector>
 #include <array>
 #include <cassert>
+#include <span>
 
 
 #define GLFW_INCLUDE_NONE
@@ -110,13 +112,12 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
         glfwSetWindowShouldClose(window, 1);
 }
 
-template <size_t N>
-class Shape {
+class IShape {
 public:
-    virtual std::array<Vertex, N> extract_vertices() = 0;
+    virtual std::span<const Vertex> extract_vertices() const = 0;
 };
 
-struct Triangle : public Shape<3> {
+struct Triangle : public IShape {
 public:
     std::array<Vertex, 3> m_vertices;
 
@@ -145,7 +146,7 @@ public:
         return *this;
     }
 
-    std::array<Vertex, 3> extract_vertices() {
+    virtual std::span<const Vertex> extract_vertices() const {
         return m_vertices;
     }
 
@@ -172,15 +173,9 @@ public:
         return m_vertices.size();
     }
 
-    template <size_t N>
-    void append(Shape<N> &shape) {
+    void append(const IShape &shape) {
         auto v = shape.extract_vertices();
         m_vertices.insert(m_vertices.end(), v.begin(), v.end());
-    }
-
-    template <size_t N>
-    void append(Shape<N> &&shape) {
-        append(shape);
     }
 
 };
@@ -237,8 +232,14 @@ int main() {
         glEnableVertexAttribArray(pos_loc);
 
         GLuint col_loc = prog.get_attrib_loc("col");
-        glVertexAttribPointer(col_loc, 3, GL_FLOAT, false, sizeof(Vertex),
-                              reinterpret_cast<void*>(offsetof(Vertex, m_color)));
+        glVertexAttribPointer(
+            col_loc,
+            3,
+            GL_FLOAT,
+            false,
+            sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, m_color))
+        );
         glEnableVertexAttribArray(col_loc);
 
 
