@@ -16,7 +16,7 @@ public:
     ShaderProgram(const char *filename_vert, const char *filename_frag);
     void use();
     GLuint get_attrib_loc(const char *name);
-    // make sure to use() the program before setting uniforms
+    // make sure to use() before setting uniforms
     void set_uniform_int(const char *name, int value);
 
 private:
