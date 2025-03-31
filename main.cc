@@ -20,7 +20,6 @@
 
 
 
-#define ARRAY_LEN(xs) (sizeof(xs) / sizeof *(xs))
 
 constexpr int width  = 1600;
 constexpr int height = 900;
@@ -75,24 +74,20 @@ glm::vec3 color_to_vec3(Color color) {
 }
 
 struct Vertex {
+public:
     glm::vec3 m_pos;
     glm::vec3 m_color;
-public:
+
     Vertex(float x, float y, float z, Color color)
     : m_pos(x, y, z)
     , m_color(color_to_vec3(color))
     {}
-};
 
-void rotate(Vertex *v, size_t size) {
-    for (size_t i=0; i < size; ++i) {
-        glm::vec3 &pos = v[i].m_pos;
-
-        glm::mat4 rotationMat(1);
-        rotationMat = glm::rotate(rotationMat, 0.01f, glm::vec3(1.0, 1.0, 0.0));
-        pos = glm::vec3(rotationMat * glm::vec4(pos, 1.0));
+    void rotate(float angle, glm::vec3 normal) {
+        m_pos = glm::rotate(m_pos, angle, normal);
     }
-}
+
+};
 
 bool is_key_pressed(GLFWwindow *window, int key) {
 
@@ -105,9 +100,11 @@ bool is_key_pressed(GLFWwindow *window, int key) {
 
 void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 
-    // if (is_key_pressed(window, GLFW_KEY_J))
-    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
-        rotate(vertices, v_size);
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+        for (size_t i=0; i < v_size; ++i) {
+            vertices[i].rotate(0.01f, { 1.0f, 1.0f, 0.0f });
+        }
+    }
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
@@ -115,16 +112,26 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 
 
 struct Triangle {
-private:
+public:
     std::array<Vertex, 3> m_vertices;
 
-public:
     Triangle(std::array<Vertex, 3> vertices) : m_vertices(vertices) {}
+    Triangle(Color a, Color b, Color c) : Triangle() {
+        m_vertices[0].m_color = color_to_vec3(a);
+        m_vertices[1].m_color = color_to_vec3(b);
+        m_vertices[2].m_color = color_to_vec3(c);
+    }
     Triangle() : m_vertices({
         Vertex( 0.5f,  0.5f, 0.0f, Color::RED),  // top-right
         Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE), // bottom-right
         Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN) // top-left
     }) {}
+
+    Triangle &rotate(float angle, glm::vec3 normal) {
+        for (size_t i=0; i < m_vertices.size(); ++i)
+            m_vertices[i].rotate(angle, normal);
+        return *this;
+    }
 
 };
 
@@ -136,20 +143,39 @@ public:
 
 };
 
+struct VertexBuffer {
+    std::vector<Vertex> m_vertices;
+
+public:
+
+    Vertex *data() {
+        return m_vertices.data();
+    }
+
+    size_t size() const {
+        return m_vertices.size();
+    }
+
+    // TODO: make this generic
+    template <typename T, size_t N>
+    void append(std::array<T, N> &arr) {
+        m_vertices.insert(m_vertices.end(), arr.begin(), arr.end());
+    }
+
+};
+
+
 int main() {
 
-    Triangle triangle;
+    VertexBuffer vbuf;
 
+    Triangle t1;
+    auto t2 = Triangle(Color::BLUE, Color::BLUE, Color::BLUE)
+        .rotate(180.0f, { 0.0f, 0.0f, 1.0f });
 
-    std::array vertices {
-        Vertex( 0.5f,  0.5f, 0.0f, Color::RED),   // top-right
-        Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),  // bottom-right
-        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN), // top-left
+    vbuf.append(t1.m_vertices);
+    vbuf.append(t2.m_vertices);
 
-        Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),  // bottom-right
-        Vertex(-0.5f, -0.5f, 0.0f, Color::RED),   // bottom-left
-        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN), // top-left
-    };
 
     GLFWwindow *window = setup_window();
 
@@ -162,16 +188,22 @@ int main() {
     GLuint vbo;
     glGenBuffers(1, &vbo);
 
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glBindVertexArray(vao);
 
     while (!glfwWindowShouldClose(window)) {
 
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vbuf.size() * sizeof(Vertex),
+            vbuf.data(),
+            GL_STATIC_DRAW
+        );
+
 
         GLuint pos_loc = prog.get_attrib_loc("pos");
         glVertexAttribPointer(pos_loc, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
@@ -183,10 +215,11 @@ int main() {
         glEnableVertexAttribArray(col_loc);
 
 
-        glClear(GL_COLOR_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
-        process_inputs(window, vertices.data(), vertices.size());
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawArrays(GL_TRIANGLES, 0, vbuf.size());
+
+        process_inputs(window, vbuf.data(), vbuf.size());
 
         glfwSwapBuffers(window);
         glfwPollEvents();

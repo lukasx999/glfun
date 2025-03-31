@@ -119224,7 +119224,6 @@ int gladLoadGL( GLADloadfunc load) {
 
 
 
-
 constexpr int width = 1600;
 constexpr int height = 900;
 
@@ -119236,38 +119235,38 @@ GLFWwindow *setup_window() {
 
     if (!glfwInit())
         exit(
-# 35 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 34 "/home/lukas/code/repos/cube/main.cc" 3 4
             1
-# 35 "/home/lukas/code/repos/cube/main.cc"
+# 34 "/home/lukas/code/repos/cube/main.cc"
                         );
 
     glfwWindowHint(
-# 37 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 36 "/home/lukas/code/repos/cube/main.cc" 3 4
                   0x00022002
-# 37 "/home/lukas/code/repos/cube/main.cc"
+# 36 "/home/lukas/code/repos/cube/main.cc"
                                             , 4);
     glfwWindowHint(
-# 38 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 37 "/home/lukas/code/repos/cube/main.cc" 3 4
                   0x00022003
-# 38 "/home/lukas/code/repos/cube/main.cc"
+# 37 "/home/lukas/code/repos/cube/main.cc"
                                             , 0);
     glfwWindowHint(
-# 39 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 38 "/home/lukas/code/repos/cube/main.cc" 3 4
                   0x00022008
-# 39 "/home/lukas/code/repos/cube/main.cc"
+# 38 "/home/lukas/code/repos/cube/main.cc"
                                      , 
-# 39 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 38 "/home/lukas/code/repos/cube/main.cc" 3 4
                                        0x00032001
-# 39 "/home/lukas/code/repos/cube/main.cc"
+# 38 "/home/lukas/code/repos/cube/main.cc"
                                                                );
 
     GLFWwindow* window = glfwCreateWindow(width, height, "Cube", nullptr, nullptr);
     if (window == nullptr) {
         glfwTerminate();
         exit(
-# 44 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 43 "/home/lukas/code/repos/cube/main.cc" 3 4
             1
-# 44 "/home/lukas/code/repos/cube/main.cc"
+# 43 "/home/lukas/code/repos/cube/main.cc"
                         );
     }
 
@@ -119298,48 +119297,44 @@ glm::vec3 color_to_vec3(Color color) {
         case Color::BLUE: return glm::vec3(0.0f, 0.0f, 1.0f);
         case Color::GREEN: return glm::vec3(0.0f, 1.0f, 0.0f);
         default: 
-# 73 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 72 "/home/lukas/code/repos/cube/main.cc" 3 4
                           (static_cast <bool> (
-# 73 "/home/lukas/code/repos/cube/main.cc"
+# 72 "/home/lukas/code/repos/cube/main.cc"
                           !"unknown color"
-# 73 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 72 "/home/lukas/code/repos/cube/main.cc" 3 4
                           ) ? void (0) : __assert_fail (
-# 73 "/home/lukas/code/repos/cube/main.cc"
+# 72 "/home/lukas/code/repos/cube/main.cc"
                           "!\"unknown color\""
-# 73 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 72 "/home/lukas/code/repos/cube/main.cc" 3 4
                           , __builtin_FILE (), __builtin_LINE (), __extension__ __PRETTY_FUNCTION__))
-# 73 "/home/lukas/code/repos/cube/main.cc"
+# 72 "/home/lukas/code/repos/cube/main.cc"
                                                   ;
     }
 }
 
 struct Vertex {
+public:
     glm::vec3 m_pos;
     glm::vec3 m_color;
-public:
+
     Vertex(float x, float y, float z, Color color)
     : m_pos(x, y, z)
     , m_color(color_to_vec3(color))
     {}
-};
 
-void rotate(Vertex *v, size_t size) {
-    for (size_t i=0; i < size; ++i) {
-        glm::vec3 &pos = v[i].m_pos;
-
-        glm::mat4 rotationMat(1);
-        rotationMat = glm::rotate(rotationMat, 0.01f, glm::vec3(1.0, 1.0, 0.0));
-        pos = glm::vec3(rotationMat * glm::vec4(pos, 1.0));
+    void rotate(float angle, glm::vec3 normal) {
+        m_pos = glm::rotate(m_pos, angle, normal);
     }
-}
+
+};
 
 bool is_key_pressed(GLFWwindow *window, int key) {
 
     static bool old = false;
     bool pressed = glfwGetKey(window, key) == 
-# 100 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 95 "/home/lukas/code/repos/cube/main.cc" 3 4
                                              1
-# 100 "/home/lukas/code/repos/cube/main.cc"
+# 95 "/home/lukas/code/repos/cube/main.cc"
                                                        ;
     bool ret = !old && pressed;
     old = pressed;
@@ -119348,42 +119343,54 @@ bool is_key_pressed(GLFWwindow *window, int key) {
 
 void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 
-
     if (glfwGetKey(window, 
-# 109 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 103 "/home/lukas/code/repos/cube/main.cc" 3 4
                           74
-# 109 "/home/lukas/code/repos/cube/main.cc"
+# 103 "/home/lukas/code/repos/cube/main.cc"
                                     ) == 
-# 109 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 103 "/home/lukas/code/repos/cube/main.cc" 3 4
                                          1
-# 109 "/home/lukas/code/repos/cube/main.cc"
-                                                   )
-        rotate(vertices, v_size);
+# 103 "/home/lukas/code/repos/cube/main.cc"
+                                                   ) {
+        for (size_t i=0; i < v_size; ++i) {
+            vertices[i].rotate(0.01f, { 1.0f, 1.0f, 0.0f });
+        }
+    }
 
     if (glfwGetKey(window, 
-# 112 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 109 "/home/lukas/code/repos/cube/main.cc" 3 4
                           256
-# 112 "/home/lukas/code/repos/cube/main.cc"
+# 109 "/home/lukas/code/repos/cube/main.cc"
                                          ) == 
-# 112 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 109 "/home/lukas/code/repos/cube/main.cc" 3 4
                                               1
-# 112 "/home/lukas/code/repos/cube/main.cc"
+# 109 "/home/lukas/code/repos/cube/main.cc"
                                                         )
         glfwSetWindowShouldClose(window, 1);
 }
 
 
 struct Triangle {
-private:
+public:
     std::array<Vertex, 3> m_vertices;
 
-public:
     Triangle(std::array<Vertex, 3> vertices) : m_vertices(vertices) {}
+    Triangle(Color a, Color b, Color c) : Triangle() {
+        m_vertices[0].m_color = color_to_vec3(a);
+        m_vertices[1].m_color = color_to_vec3(b);
+        m_vertices[2].m_color = color_to_vec3(c);
+    }
     Triangle() : m_vertices({
         Vertex( 0.5f, 0.5f, 0.0f, Color::RED),
         Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),
         Vertex(-0.5f, 0.5f, 0.0f, Color::GREEN)
     }) {}
+
+    Triangle &rotate(float angle, glm::vec3 normal) {
+        for (size_t i=0; i < m_vertices.size(); ++i)
+            m_vertices[i].rotate(angle, normal);
+        return *this;
+    }
 
 };
 
@@ -119395,20 +119402,39 @@ public:
 
 };
 
+struct VertexBuffer {
+    std::vector<Vertex> m_vertices;
+
+public:
+
+    Vertex *data() {
+        return m_vertices.data();
+    }
+
+    size_t size() const {
+        return m_vertices.size();
+    }
+
+
+    template <typename T, size_t N>
+    void append(std::array<T, N> &arr) {
+        m_vertices.insert(m_vertices.end(), arr.begin(), arr.end());
+    }
+
+};
+
+
 int main() {
 
-    Triangle triangle;
+    VertexBuffer vbuf;
 
+    Triangle t1;
+    auto t2 = Triangle(Color::BLUE, Color::BLUE, Color::BLUE)
+        .rotate(180.0f, { 0.0f, 0.0f, 1.0f });
 
-    std::array vertices {
-        Vertex( 0.5f, 0.5f, 0.0f, Color::RED),
-        Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),
-        Vertex(-0.5f, 0.5f, 0.0f, Color::GREEN),
+    vbuf.append(t1.m_vertices);
+    vbuf.append(t2.m_vertices);
 
-        Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),
-        Vertex(-0.5f, -0.5f, 0.0f, Color::RED),
-        Vertex(-0.5f, 0.5f, 0.0f, Color::GREEN),
-    };
 
     GLFWwindow *window = setup_window();
 
@@ -119421,16 +119447,22 @@ int main() {
     GLuint vbo;
     glad_glGenBuffers(1, &vbo);
 
+
     glad_glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    glad_glBindVertexArray(vao);
 
     while (!glfwWindowShouldClose(window)) {
 
         glad_glBindVertexArray(vao);
         glad_glBindBuffer(0x8892, vbo);
 
-        glad_glBufferData(0x8892, vertices.size() * sizeof(Vertex), vertices.data(), 0x88E4);
+        glad_glBufferData(
+            0x8892,
+            vbuf.size() * sizeof(Vertex),
+            vbuf.data(),
+            0x88E4
+        );
+
 
         GLuint pos_loc = prog.get_attrib_loc("pos");
         glad_glVertexAttribPointer(pos_loc, 3, 0x1406, false, sizeof(Vertex), nullptr);
@@ -119439,25 +119471,26 @@ int main() {
         GLuint col_loc = prog.get_attrib_loc("col");
         glad_glVertexAttribPointer(col_loc, 3, 0x1406, false, sizeof(Vertex),
                               reinterpret_cast<void*>(
-# 182 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 214 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      __builtin_offsetof (
-# 182 "/home/lukas/code/repos/cube/main.cc"
+# 214 "/home/lukas/code/repos/cube/main.cc"
                                                      Vertex
-# 182 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 214 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      , 
-# 182 "/home/lukas/code/repos/cube/main.cc"
+# 214 "/home/lukas/code/repos/cube/main.cc"
                                                      m_color
-# 182 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 214 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      )
-# 182 "/home/lukas/code/repos/cube/main.cc"
+# 214 "/home/lukas/code/repos/cube/main.cc"
                                                                               ));
         glad_glEnableVertexAttribArray(col_loc);
 
 
-        glad_glClear(0x00004000);
-        glad_glDrawArrays(0x0004, 0, vertices.size());
 
-        process_inputs(window, vertices.data(), vertices.size());
+        glad_glClear(0x00004000);
+        glad_glDrawArrays(0x0004, 0, vbuf.size());
+
+        process_inputs(window, vbuf.data(), vbuf.size());
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -119466,8 +119499,8 @@ int main() {
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(
-# 197 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 230 "/home/lukas/code/repos/cube/main.cc" 3 4
         0
-# 197 "/home/lukas/code/repos/cube/main.cc"
+# 230 "/home/lukas/code/repos/cube/main.cc"
                     );
 }
