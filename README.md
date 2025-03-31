@@ -1,2 +1,0 @@
-# glcube
-cube in opengl
