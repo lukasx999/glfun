@@ -162,8 +162,7 @@ struct Rectangle : public IShape {
 public:
 
     Rectangle() : m_triangles(
-        { Triangle(), Triangle()
-            .rotate(180.0f, { 0.0f, 0.0f, 1.0f }) }
+        { Triangle(), Triangle().rotate(180.0f, { 0.0f, 0.0f, 1.0f }) }
     ) {}
 
     virtual std::vector<Vertex> extract_vertices() const {
