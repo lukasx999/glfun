@@ -328,14 +328,8 @@ int main() {
         glEnableVertexAttribArray(pos_loc);
 
         GLuint col_loc = prog.get_attrib_loc("col");
-        glVertexAttribPointer(
-            col_loc,
-            3,
-            GL_FLOAT,
-            false,
-            sizeof(Vertex),
-            reinterpret_cast<void*>(offsetof(Vertex, m_color))
-        );
+        glVertexAttribPointer(col_loc, 3, GL_FLOAT, false, sizeof(Vertex),
+                              reinterpret_cast<void*>(offsetof(Vertex, m_color)));
         glEnableVertexAttribArray(col_loc);
 
 
