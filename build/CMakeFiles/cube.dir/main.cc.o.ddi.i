@@ -119369,12 +119369,23 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
         glfwSetWindowShouldClose(window, 1);
 }
 
+template <size_t N>
+class Shape {
+public:
+    virtual std::array<Vertex, N> extract_vertices() = 0;
+};
 
-struct Triangle {
+struct Triangle : public Shape<3> {
 public:
     std::array<Vertex, 3> m_vertices;
 
     Triangle(std::array<Vertex, 3> vertices) : m_vertices(vertices) {}
+
+    Triangle(Color all) : Triangle() {
+        for (auto &v : m_vertices)
+            v.m_color = color_to_vec3(all);
+    }
+
     Triangle(Color a, Color b, Color c) : Triangle() {
         m_vertices[0].m_color = color_to_vec3(a);
         m_vertices[1].m_color = color_to_vec3(b);
@@ -119387,9 +119398,14 @@ public:
     }) {}
 
     Triangle &rotate(float angle, glm::vec3 normal) {
-        for (size_t i=0; i < m_vertices.size(); ++i)
-            m_vertices[i].rotate(angle, normal);
+        for (auto &v : m_vertices)
+            v.rotate(angle, normal);
+
         return *this;
+    }
+
+    std::array<Vertex, 3> extract_vertices() {
+        return m_vertices;
     }
 
 };
@@ -119416,9 +119432,16 @@ public:
     }
 
 
+
     template <typename T, size_t N>
     void append(std::array<T, N> &arr) {
         m_vertices.insert(m_vertices.end(), arr.begin(), arr.end());
+    }
+
+    template <size_t N>
+    void append(Shape<N> &shape) {
+        auto v = shape.extract_vertices();
+        m_vertices.insert(m_vertices.end(), v.begin(), v.end());
     }
 
 };
@@ -119429,11 +119452,15 @@ int main() {
     VertexBuffer vbuf;
 
     Triangle t1;
-    auto t2 = Triangle(Color::BLUE, Color::BLUE, Color::BLUE)
+    auto t2 = Triangle(Color::BLUE)
         .rotate(180.0f, { 0.0f, 0.0f, 1.0f });
 
-    vbuf.append(t1.m_vertices);
-    vbuf.append(t2.m_vertices);
+    auto t3 = Triangle(Color::RED)
+        .rotate(90.0f, { 1.0f, 0.0f, 0.0f });
+
+    vbuf.append(t1);
+    vbuf.append(t2);
+    vbuf.append(t3);
 
 
     GLFWwindow *window = setup_window();
@@ -119471,17 +119498,17 @@ int main() {
         GLuint col_loc = prog.get_attrib_loc("col");
         glad_glVertexAttribPointer(col_loc, 3, 0x1406, false, sizeof(Vertex),
                               reinterpret_cast<void*>(
-# 214 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 241 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      __builtin_offsetof (
-# 214 "/home/lukas/code/repos/cube/main.cc"
+# 241 "/home/lukas/code/repos/cube/main.cc"
                                                      Vertex
-# 214 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 241 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      , 
-# 214 "/home/lukas/code/repos/cube/main.cc"
+# 241 "/home/lukas/code/repos/cube/main.cc"
                                                      m_color
-# 214 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 241 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      )
-# 214 "/home/lukas/code/repos/cube/main.cc"
+# 241 "/home/lukas/code/repos/cube/main.cc"
                                                                               ));
         glad_glEnableVertexAttribArray(col_loc);
 
@@ -119499,8 +119526,8 @@ int main() {
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(
-# 230 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 257 "/home/lukas/code/repos/cube/main.cc" 3 4
         0
-# 230 "/home/lukas/code/repos/cube/main.cc"
+# 257 "/home/lukas/code/repos/cube/main.cc"
                     );
 }
