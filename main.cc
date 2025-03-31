@@ -114,12 +114,14 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 
 class IShape {
 public:
-    virtual std::span<const Vertex> extract_vertices() const = 0;
+    virtual std::vector<Vertex> extract_vertices() const = 0;
 };
 
 struct Triangle : public IShape {
-public:
+
     std::array<Vertex, 3> m_vertices;
+
+public:
 
     Triangle(std::array<Vertex, 3> vertices) : m_vertices(vertices) {}
 
@@ -133,6 +135,7 @@ public:
         m_vertices[1].m_color = color_to_vec3(b);
         m_vertices[2].m_color = color_to_vec3(c);
     }
+
     Triangle() : m_vertices({
         Vertex( 0.5f,  0.5f, 0.0f, Color::RED),  // top-right
         Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE), // bottom-right
@@ -146,21 +149,38 @@ public:
         return *this;
     }
 
-    virtual std::span<const Vertex> extract_vertices() const {
-        return m_vertices;
+    virtual std::vector<Vertex> extract_vertices() const {
+        return std::vector(m_vertices.begin(), m_vertices.end());
     }
 
 };
 
-struct Rectangle {
-private:
+struct Rectangle : public IShape {
+
     std::array<Triangle, 2> m_triangles;
 
 public:
 
+    Rectangle() : m_triangles(
+        { Triangle(), Triangle()
+            .rotate(180.0f, { 0.0f, 0.0f, 1.0f }) }
+    ) {}
+
+    virtual std::vector<Vertex> extract_vertices() const {
+
+        std::vector<Vertex> v;
+
+        for (auto &t : m_triangles)
+            for (auto &x : t.extract_vertices())
+                v.push_back(x);
+
+        return v;
+    }
+
 };
 
 struct VertexBuffer {
+
     std::vector<Vertex> m_vertices;
 
 public:
@@ -174,8 +194,13 @@ public:
     }
 
     void append(const IShape &shape) {
-        auto v = shape.extract_vertices();
-        m_vertices.insert(m_vertices.end(), v.begin(), v.end());
+        auto other = shape.extract_vertices();
+        m_vertices.insert(m_vertices.end(), other.begin(), other.end());
+    }
+
+    void scale(float factor) {
+        for (auto &v : m_vertices)
+            v.m_pos *= factor;
     }
 
 };
@@ -185,17 +210,20 @@ int main() {
 
     VertexBuffer vbuf;
 
-    vbuf.append(Triangle());
+    vbuf.append(Rectangle());
+    // vbuf.append(Triangle());
+    //
+    // vbuf.append(
+    //     Triangle(Color::BLUE)
+    //     .rotate(180.0f, { 0.0f, 0.0f, 1.0f })
+    // );
+    //
+    // vbuf.append(
+    //     Triangle(Color::RED)
+    //     .rotate(90.0f, { 1.0f, 0.0f, 0.0f })
+    // );
 
-    vbuf.append(
-        Triangle(Color::BLUE)
-        .rotate(180.0f, { 0.0f, 0.0f, 1.0f })
-    );
-
-    vbuf.append(
-        Triangle(Color::RED)
-        .rotate(90.0f, { 1.0f, 0.0f, 0.0f })
-    );
+    vbuf.scale(0.5f);
 
 
 
