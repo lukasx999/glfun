@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles/cube.dir/main.cc.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

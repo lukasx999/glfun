@@ -1,0 +1,22 @@
+# ninja log v6
+728	764	1743432042182594302	cube	44b5966649e14e33
+76	750	1743430981628488234	CMakeFiles/shader.dir/shader.cc.o	1503913cb1836b54
+115	728	1743432041570623425	CMakeFiles/cube.dir/main.cc.o	d65657f93f3bbf04
+750	777	1743430982301202601	libshader.a	9164059a65ac8dfe
+110	115	1743432041564939318	CMakeFiles/cube.dir/CXX.dd	fad495a5901e017c
+110	115	1743432041564939318	CMakeFiles/cube.dir/main.cc.o.modmap	fad495a5901e017c
+2	14	1743432041457990816	CMakeFiles/shader.dir/shader.cc.o.modmap	453164be3824359d
+110	115	1743432041564939318	/home/lukas/code/repos/cube/build/CMakeFiles/cube.dir/CXXModules.json	fad495a5901e017c
+2	110	1743432041456560612	CMakeFiles/cube.dir/main.cc.o.ddi	d3cb2d863bf9e60d
+2	14	1743432041457990816	/home/lukas/code/repos/cube/build/CMakeFiles/shader.dir/CXXModules.json	453164be3824359d
+2	14	1743432041457990816	CMakeFiles/shader.dir/CXX.dd	453164be3824359d
+3	68	1743430981554169213	CMakeFiles/shader.dir/shader.cc.o.ddi	5077c57d9da129de
+5	20	1743432479546505406	CMakeFiles/shader.dir/CXX.dd	453164be3824359d
+5	20	1743432479546505406	/home/lukas/code/repos/cube/build/CMakeFiles/shader.dir/CXXModules.json	453164be3824359d
+5	20	1743432479546505406	CMakeFiles/shader.dir/shader.cc.o.modmap	453164be3824359d
+4	109	1743432479545505361	CMakeFiles/cube.dir/main.cc.o.ddi	d3cb2d863bf9e60d
+109	114	1743432479650547196	CMakeFiles/cube.dir/CXX.dd	fad495a5901e017c
+109	114	1743432479650547196	/home/lukas/code/repos/cube/build/CMakeFiles/cube.dir/CXXModules.json	fad495a5901e017c
+109	114	1743432479650547196	CMakeFiles/cube.dir/main.cc.o.modmap	fad495a5901e017c
+114	723	1743432479656589010	CMakeFiles/cube.dir/main.cc.o	d65657f93f3bbf04
+723	757	1743432480264537621	cube	44b5966649e14e33

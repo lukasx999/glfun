@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles/shader.dir/shader.cc.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

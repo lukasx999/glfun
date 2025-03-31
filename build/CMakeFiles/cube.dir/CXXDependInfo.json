@@ -1,0 +1,27 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "GNU",
+	"compiler-simulate-id" : "",
+	"config" : "",
+	"cxx-modules" : {},
+	"database-info" : null,
+	"dir-cur-bld" : "/home/lukas/code/repos/cube/build",
+	"dir-cur-src" : "/home/lukas/code/repos/cube",
+	"dir-top-bld" : "/home/lukas/code/repos/cube/build",
+	"dir-top-src" : "/home/lukas/code/repos/cube",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : [],
+	"language" : "CXX",
+	"linked-target-dirs" : [],
+	"module-dir" : "/home/lukas/code/repos/cube/build/CMakeFiles/cube.dir",
+	"sources" : 
+	{
+		"CMakeFiles/cube.dir/main.cc.o" : 
+		{
+			"language" : "CXX",
+			"source" : "/home/lukas/code/repos/cube/main.cc"
+		}
+	}
+}

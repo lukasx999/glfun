@@ -1,5 +1,8 @@
 #include <print>
 #include <fstream>
+#include <vector>
+#include <array>
+#include <cassert>
 
 
 #define GLFW_INCLUDE_NONE
@@ -19,9 +22,7 @@
 
 #define ARRAY_LEN(xs) (sizeof(xs) / sizeof *(xs))
 
-constexpr const char *shader_vert = "vert.glsl";
-constexpr const char *shader_frag = "frag.glsl";
-constexpr int width = 1600;
+constexpr int width  = 1600;
 constexpr int height = 900;
 
 
@@ -97,9 +98,7 @@ bool is_key_pressed(GLFWwindow *window, int key) {
 
     static bool old = false;
     bool pressed = glfwGetKey(window, key) == GLFW_PRESS;
-
     bool ret = !old && pressed;
-
     old = pressed;
     return ret;
 }
@@ -117,7 +116,7 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 
 int main() {
 
-    Vertex vertices[] = {
+    std::array vertices {
         Vertex( 0.5f,  0.5f, 0.0f, Color::RED),   // top-right
         Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),  // bottom-right
         Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN), // top-left
@@ -127,34 +126,19 @@ int main() {
         Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN), // top-left
     };
 
-    for (size_t i=12; i < ARRAY_LEN(vertices); ++i) {
-        glm::vec3 &pos = vertices[i].m_pos;
-
-        glm::mat4 rotationMat(1);
-        rotationMat = glm::rotate(rotationMat, 90.0f, glm::vec3(0.0, 1.0, 0.0));
-        pos = glm::vec3(rotationMat * glm::vec4(pos, 1.0));
-    }
-
-    // scale down
-    for (size_t i=0; i < ARRAY_LEN(vertices); ++i) {
-        glm::vec3 &pos = vertices[i].m_pos;
-        pos = pos * 0.5f;
-    }
-
-
-
     GLFWwindow *window = setup_window();
-    auto prog = ShaderProgram(shader_vert, shader_frag);
 
-    unsigned int vao;
+    ShaderProgram prog("vert.glsl", "frag.glsl");
+    prog.use();
+
+    GLuint vao;
     glGenVertexArrays(1, &vao);
 
-    unsigned int vbo;
+    GLuint vbo;
     glGenBuffers(1, &vbo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    prog.use();
     glBindVertexArray(vao);
 
     while (!glfwWindowShouldClose(window)) {
@@ -162,21 +146,22 @@ int main() {
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
         GLuint pos_loc = prog.get_attrib_loc("pos");
         glVertexAttribPointer(pos_loc, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
         glEnableVertexAttribArray(pos_loc);
 
         GLuint col_loc = prog.get_attrib_loc("col");
-        glVertexAttribPointer(col_loc, 3, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_color)));
+        glVertexAttribPointer(col_loc, 3, GL_FLOAT, false, sizeof(Vertex),
+                              reinterpret_cast<void*>(offsetof(Vertex, m_color)));
         glEnableVertexAttribArray(col_loc);
 
 
         glClear(GL_COLOR_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
-        process_inputs(window, vertices, ARRAY_LEN(vertices));
+        process_inputs(window, vertices.data(), vertices.size());
 
         glfwSwapBuffers(window);
         glfwPollEvents();

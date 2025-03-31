@@ -1,0 +1,4 @@
+/home/lukas/code/repos/cube/build/CMakeFiles/cube.dir
+/home/lukas/code/repos/cube/build/CMakeFiles/shader.dir
+/home/lukas/code/repos/cube/build/CMakeFiles/edit_cache.dir
+/home/lukas/code/repos/cube/build/CMakeFiles/rebuild_cache.dir
