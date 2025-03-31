@@ -114,7 +114,32 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 }
 
 
+struct Triangle {
+private:
+    std::array<Vertex, 3> m_vertices;
+
+public:
+    Triangle(std::array<Vertex, 3> vertices) : m_vertices(vertices) {}
+    Triangle() : m_vertices({
+        Vertex( 0.5f,  0.5f, 0.0f, Color::RED),  // top-right
+        Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE), // bottom-right
+        Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN) // top-left
+    }) {}
+
+};
+
+struct Rectangle {
+private:
+    std::array<Triangle, 2> m_triangles;
+
+public:
+
+};
+
 int main() {
+
+    Triangle triangle;
+
 
     std::array vertices {
         Vertex( 0.5f,  0.5f, 0.0f, Color::RED),   // top-right

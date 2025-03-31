@@ -119373,7 +119373,32 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 }
 
 
+struct Triangle {
+private:
+    std::array<Vertex, 3> m_vertices;
+
+public:
+    Triangle(std::array<Vertex, 3> vertices) : m_vertices(vertices) {}
+    Triangle() : m_vertices({
+        Vertex( 0.5f, 0.5f, 0.0f, Color::RED),
+        Vertex( 0.5f, -0.5f, 0.0f, Color::BLUE),
+        Vertex(-0.5f, 0.5f, 0.0f, Color::GREEN)
+    }) {}
+
+};
+
+struct Rectangle {
+private:
+    std::array<Triangle, 2> m_triangles;
+
+public:
+
+};
+
 int main() {
+
+    Triangle triangle;
+
 
     std::array vertices {
         Vertex( 0.5f, 0.5f, 0.0f, Color::RED),
@@ -119414,17 +119439,17 @@ int main() {
         GLuint col_loc = prog.get_attrib_loc("col");
         glad_glVertexAttribPointer(col_loc, 3, 0x1406, false, sizeof(Vertex),
                               reinterpret_cast<void*>(
-# 157 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 182 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      __builtin_offsetof (
-# 157 "/home/lukas/code/repos/cube/main.cc"
+# 182 "/home/lukas/code/repos/cube/main.cc"
                                                      Vertex
-# 157 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 182 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      , 
-# 157 "/home/lukas/code/repos/cube/main.cc"
+# 182 "/home/lukas/code/repos/cube/main.cc"
                                                      m_color
-# 157 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 182 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      )
-# 157 "/home/lukas/code/repos/cube/main.cc"
+# 182 "/home/lukas/code/repos/cube/main.cc"
                                                                               ));
         glad_glEnableVertexAttribArray(col_loc);
 
@@ -119441,8 +119466,8 @@ int main() {
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(
-# 172 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 197 "/home/lukas/code/repos/cube/main.cc" 3 4
         0
-# 172 "/home/lukas/code/repos/cube/main.cc"
+# 197 "/home/lukas/code/repos/cube/main.cc"
                     );
 }
