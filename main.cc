@@ -64,13 +64,19 @@ enum class Color {
     RED,
     BLUE,
     GREEN,
+    MAGENTA,
+    YELLOW,
+    CYAN,
 };
 
 glm::vec3 color_to_vec3(Color color) {
     switch (color) {
-        case Color::RED:   return glm::vec3(1.0f, 0.0f, 0.0f);
-        case Color::BLUE:  return glm::vec3(0.0f, 0.0f, 1.0f);
-        case Color::GREEN: return glm::vec3(0.0f, 1.0f, 0.0f);
+        case Color::RED:     return glm::vec3(1.0f, 0.0f, 0.0f);
+        case Color::BLUE:    return glm::vec3(0.0f, 0.0f, 1.0f);
+        case Color::GREEN:   return glm::vec3(0.0f, 1.0f, 0.0f);
+        case Color::MAGENTA: return glm::vec3(1.0f, 0.0f, 1.0f);
+        case Color::YELLOW:  return glm::vec3(1.0f, 1.0f, 0.0f);
+        case Color::CYAN:    return glm::vec3(0.0f, 1.0f, 1.0f);
         default:           assert(!"unknown color");
     }
 }
@@ -142,6 +148,21 @@ public:
         Vertex(-0.5f,  0.5f, 0.0f, Color::GREEN) // top-left
     }) {}
 
+    Triangle &add_x(float value) {
+        for (auto &v : m_vertices) v.m_pos.x += value;
+        return *this;
+    }
+
+    Triangle &add_z(float value) {
+        for (auto &v : m_vertices) v.m_pos.z += value;
+        return *this;
+    }
+
+    Triangle &add_y(float value) {
+        for (auto &v : m_vertices) v.m_pos.y += value;
+        return *this;
+    }
+
     Triangle &rotate(float angle, glm::vec3 normal) {
         for (auto &v : m_vertices)
             v.rotate(angle, normal);
@@ -161,9 +182,37 @@ struct Rectangle : public IShape {
 
 public:
 
-    Rectangle() : m_triangles(
-        { Triangle(), Triangle().rotate(180.0f, { 0.0f, 0.0f, 1.0f }) }
+    Rectangle(Color c) : m_triangles(
+        { Triangle(c), Triangle(c)
+            .rotate(glm::pi<float>(), { 0.0f, 0.0f, 1.0f }) }
     ) {}
+
+    Rectangle() : m_triangles(
+        { Triangle(), Triangle()
+            .rotate(glm::pi<float>(), { 0.0f, 0.0f, 1.0f }) }
+    ) {}
+
+    Rectangle &add_x(float value) {
+        for (auto &t : m_triangles) t.add_x(value);
+        return *this;
+    }
+
+    Rectangle &add_z(float value) {
+        for (auto &t : m_triangles) t.add_z(value);
+        return *this;
+    }
+
+    Rectangle &add_y(float value) {
+        for (auto &t : m_triangles) t.add_y(value);
+        return *this;
+    }
+
+    Rectangle &rotate(float angle, glm::vec3 normal) {
+        for (auto &t : m_triangles)
+            t.rotate(angle, normal);
+
+        return *this;
+    }
 
     virtual std::vector<Vertex> extract_vertices() const {
 
@@ -209,7 +258,27 @@ int main() {
 
     VertexBuffer vbuf;
 
-    vbuf.append(Rectangle());
+    vbuf.append(Rectangle(Color::RED));
+    vbuf.append(Rectangle(Color::YELLOW)
+                .rotate(glm::half_pi<float>(), { 1.0f, 0.0f, 0.0f })
+                .add_y(0.5f)
+                .add_z(0.5f));
+    vbuf.append(Rectangle(Color::CYAN)
+                .rotate(glm::half_pi<float>(), { 1.0f, 0.0f, 0.0f })
+                .add_y(-0.5f)
+                .add_z(0.5f));
+    vbuf.append(Rectangle()
+                .add_z(1.0f));
+    vbuf.append(Rectangle(Color::BLUE)
+                .rotate(glm::half_pi<float>(), { 0.0f, 1.0f, 0.0f })
+                .add_x(0.5f)
+                .add_z(0.5f));
+
+    vbuf.append(Rectangle(Color::GREEN)
+                .rotate(glm::half_pi<float>(), { 0.0f, 1.0f, 0.0f })
+                .add_x(-0.5f)
+                .add_z(0.5f));
+
     // vbuf.append(Triangle());
     //
     // vbuf.append(
