@@ -172,17 +172,15 @@ public:
         return m_vertices.size();
     }
 
-    // TODO: make an abstract class for shapes
-    // implement dynamic dispatch here
-    template <typename T, size_t N>
-    void append(std::array<T, N> &arr) {
-        m_vertices.insert(m_vertices.end(), arr.begin(), arr.end());
-    }
-
     template <size_t N>
     void append(Shape<N> &shape) {
         auto v = shape.extract_vertices();
         m_vertices.insert(m_vertices.end(), v.begin(), v.end());
+    }
+
+    template <size_t N>
+    void append(Shape<N> &&shape) {
+        append(shape);
     }
 
 };
@@ -192,16 +190,18 @@ int main() {
 
     VertexBuffer vbuf;
 
-    Triangle t1;
-    auto t2 = Triangle(Color::BLUE)
-        .rotate(180.0f, { 0.0f, 0.0f, 1.0f });
+    vbuf.append(Triangle());
 
-    auto t3 = Triangle(Color::RED)
-        .rotate(90.0f, { 1.0f, 0.0f, 0.0f });
+    vbuf.append(
+        Triangle(Color::BLUE)
+        .rotate(180.0f, { 0.0f, 0.0f, 1.0f })
+    );
 
-    vbuf.append(t1);
-    vbuf.append(t2);
-    vbuf.append(t3);
+    vbuf.append(
+        Triangle(Color::RED)
+        .rotate(90.0f, { 1.0f, 0.0f, 0.0f })
+    );
+
 
 
     GLFWwindow *window = setup_window();

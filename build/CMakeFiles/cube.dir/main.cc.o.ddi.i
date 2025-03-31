@@ -119431,17 +119431,15 @@ public:
         return m_vertices.size();
     }
 
-
-
-    template <typename T, size_t N>
-    void append(std::array<T, N> &arr) {
-        m_vertices.insert(m_vertices.end(), arr.begin(), arr.end());
-    }
-
     template <size_t N>
     void append(Shape<N> &shape) {
         auto v = shape.extract_vertices();
         m_vertices.insert(m_vertices.end(), v.begin(), v.end());
+    }
+
+    template <size_t N>
+    void append(Shape<N> &&shape) {
+        append(shape);
     }
 
 };
@@ -119451,16 +119449,14 @@ int main() {
 
     VertexBuffer vbuf;
 
-    Triangle t1;
-    auto t2 = Triangle(Color::BLUE)
-        .rotate(180.0f, { 0.0f, 0.0f, 1.0f });
+    vbuf.append(Triangle());
 
-    auto t3 = Triangle(Color::RED)
-        .rotate(90.0f, { 1.0f, 0.0f, 0.0f });
+    vbuf.append(Triangle(Color::BLUE)
+        .rotate(180.0f, { 0.0f, 0.0f, 1.0f }));
 
-    vbuf.append(t1);
-    vbuf.append(t2);
-    vbuf.append(t3);
+    vbuf.append(Triangle(Color::RED)
+        .rotate(90.0f, { 1.0f, 0.0f, 0.0f }));
+
 
 
     GLFWwindow *window = setup_window();
@@ -119498,17 +119494,17 @@ int main() {
         GLuint col_loc = prog.get_attrib_loc("col");
         glad_glVertexAttribPointer(col_loc, 3, 0x1406, false, sizeof(Vertex),
                               reinterpret_cast<void*>(
-# 241 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 237 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      __builtin_offsetof (
-# 241 "/home/lukas/code/repos/cube/main.cc"
+# 237 "/home/lukas/code/repos/cube/main.cc"
                                                      Vertex
-# 241 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 237 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      , 
-# 241 "/home/lukas/code/repos/cube/main.cc"
+# 237 "/home/lukas/code/repos/cube/main.cc"
                                                      m_color
-# 241 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 237 "/home/lukas/code/repos/cube/main.cc" 3 4
                                                      )
-# 241 "/home/lukas/code/repos/cube/main.cc"
+# 237 "/home/lukas/code/repos/cube/main.cc"
                                                                               ));
         glad_glEnableVertexAttribArray(col_loc);
 
@@ -119526,8 +119522,8 @@ int main() {
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(
-# 257 "/home/lukas/code/repos/cube/main.cc" 3 4
+# 253 "/home/lukas/code/repos/cube/main.cc" 3 4
         0
-# 257 "/home/lukas/code/repos/cube/main.cc"
+# 253 "/home/lukas/code/repos/cube/main.cc"
                     );
 }
