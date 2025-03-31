@@ -4,10 +4,10 @@ LIBS=-lglfw -lGL
 
 all: cube
 
-cube: main.o
+cube: main.o shader.o
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 
-%.o: %.cc Makefile
+%.o: %.cc Makefile shader.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
