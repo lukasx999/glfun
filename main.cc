@@ -150,6 +150,14 @@ public:
     , m_unit(unit)
     {}
 
+    void set_uniform(ShaderProgram &shader, const char *name) {
+        // TODO: get texture unit GLenum as integer
+        shader
+            .use()
+            .set_uniform_int(name, 0)
+            .set_uniform_int("tex_face", 1);
+    }
+
     void bind() {
         glActiveTexture(m_unit);
         glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -201,7 +209,6 @@ int main() {
 
     GLFWwindow *window = setup_window();
 
-
     ShaderProgram shader("vert.glsl", "frag.glsl");
 
     std::array<std::pair<GLenum, GLint>, 4> tex_params {
@@ -211,8 +218,8 @@ int main() {
         std::pair { GL_TEXTURE_MAG_FILTER, GL_LINEAR }
     };
 
-    Texture tex_container(GL_TEXTURE0, "container.jpg", false, GL_RGB, std::span(tex_params));
-    Texture tex_face(GL_TEXTURE1, "awesomeface.png", true, GL_RGBA, std::span(tex_params));
+    Texture tex_container(GL_TEXTURE0, "container.jpg",   false, GL_RGB,  std::span(tex_params));
+    Texture tex_face     (GL_TEXTURE1, "awesomeface.png", true,  GL_RGBA, std::span(tex_params));
 
     shader.use();
     shader.set_uniform_int("tex_container", 0);

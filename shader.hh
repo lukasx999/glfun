@@ -14,10 +14,10 @@ private:
 
 public:
     ShaderProgram(const char *filename_vert, const char *filename_frag);
-    void use();
+    ShaderProgram &use();
     GLuint get_attrib_loc(const char *name);
     // make sure to use() before setting uniforms
-    void set_uniform_int(const char *name, int value);
+    ShaderProgram &set_uniform_int(const char *name, int value);
 
 private:
     std::string read_entire_file(const char *filename);

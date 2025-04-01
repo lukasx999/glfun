@@ -14,17 +14,19 @@ ShaderProgram::ShaderProgram(const char *filename_vert, const char *filename_fra
 : m_program(setup_program(filename_vert, filename_frag))
 {}
 
-void ShaderProgram::set_uniform_int(const char *name, int value) {
+ShaderProgram &ShaderProgram::set_uniform_int(const char *name, int value) {
     int loc = glGetUniformLocation(m_program, name);
     glUniform1i(loc, value);
+    return *this;
 }
 
 GLuint ShaderProgram::get_attrib_loc(const char *name) {
     return glGetAttribLocation(m_program, name);
 }
 
-void ShaderProgram::use() {
+ShaderProgram &ShaderProgram::use() {
     glUseProgram(m_program);
+    return *this;
 }
 
 std::string ShaderProgram::read_entire_file(const char *filename) {
