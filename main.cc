@@ -135,10 +135,10 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 int main() {
 
     std::array vertices {
-        Vertex({  0.5f,  0.5f, 0.0f }, {}, Color::RED), // top right
-        Vertex({  0.5f, -0.5f, 0.0f }, {}, Color::RED), // bottom right
-        Vertex({ -0.5f, -0.5f, 0.0f }, {}, Color::RED), // bottom left
-        Vertex({ -0.5f,  0.5f, 0.0f }, {}, Color::RED), // top left
+        Vertex({  0.5f,  0.5f, 0.0f }, { 1.0f, 1.0f }, Color::RED),   // top right
+        Vertex({  0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f }, Color::BLUE),  // bottom right
+        Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f }, Color::GREEN), // bottom left
+        Vertex({ -0.5f,  0.5f, 0.0f }, { 0.0f, 1.0f }, Color::CYAN),  // top left
     };
 
     std::array indices {
@@ -150,6 +150,8 @@ int main() {
     GLFWwindow *window = setup_window();
 
 
+
+    // TODO: refactor into class
 
     const char *image_filename = "container.jpg";
     int width, height, nrChannels;
@@ -168,9 +170,6 @@ int main() {
 
 
     ShaderProgram prog("vert.glsl", "frag.glsl");
-    prog.use();
-
-
 
     GLuint ebo;
     glGenBuffers(1, &ebo);
@@ -182,10 +181,10 @@ int main() {
     glGenBuffers(1, &vbo);
 
 
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -200,20 +199,22 @@ int main() {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW); 
 
-        GLuint pos_loc = prog.get_attrib_loc("pos");
+        GLuint pos_loc = prog.get_attrib_loc("a_pos");
         glVertexAttribPointer(pos_loc, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
         glEnableVertexAttribArray(pos_loc);
 
-        GLuint tex_loc = prog.get_attrib_loc("tex_coords");
+        GLuint tex_loc = prog.get_attrib_loc("a_tex_coords");
         glVertexAttribPointer(tex_loc, 2, GL_FLOAT, false, sizeof(Vertex),
                               reinterpret_cast<void*>(offsetof(Vertex, m_tex_coords)));
         glEnableVertexAttribArray(tex_loc);
 
-        GLuint col_loc = prog.get_attrib_loc("col");
+        GLuint col_loc = prog.get_attrib_loc("a_col");
         glVertexAttribPointer(col_loc, 3, GL_FLOAT, false, sizeof(Vertex),
                               reinterpret_cast<void*>(offsetof(Vertex, m_color)));
         glEnableVertexAttribArray(col_loc);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
         prog.use();
         glBindVertexArray(vao);
 
