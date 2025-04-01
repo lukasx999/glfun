@@ -11,21 +11,21 @@
 
 
 ShaderProgram::ShaderProgram(const char *filename_vert, const char *filename_frag)
-: m_program(setup_program(filename_vert, filename_frag))
+: m_id(setup_program(filename_vert, filename_frag))
 {}
 
 ShaderProgram &ShaderProgram::set_uniform_int(const char *name, int value) {
-    int loc = glGetUniformLocation(m_program, name);
+    int loc = glGetUniformLocation(m_id, name);
     glUniform1i(loc, value);
     return *this;
 }
 
 GLuint ShaderProgram::get_attrib_loc(const char *name) {
-    return glGetAttribLocation(m_program, name);
+    return glGetAttribLocation(m_id, name);
 }
 
 ShaderProgram &ShaderProgram::use() {
-    glUseProgram(m_program);
+    glUseProgram(m_id);
     return *this;
 }
 

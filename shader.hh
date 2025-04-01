@@ -10,7 +10,7 @@
 
 class ShaderProgram {
 private:
-    GLuint m_program;
+    GLuint m_id;
 
 public:
     ShaderProgram(const char *filename_vert, const char *filename_frag);

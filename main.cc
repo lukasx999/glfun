@@ -22,6 +22,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "stb_image_resize2.h"
+
 
 
 
@@ -96,8 +99,9 @@ public:
         , m_color(color_to_vec3(color))
     {}
 
-    void rotate(float angle, glm::vec3 normal) {
+    Vertex &rotate(float angle, glm::vec3 normal) {
         m_pos = glm::rotate(m_pos, angle, normal);
+        return *this;
     }
 
 };
@@ -139,47 +143,44 @@ class Texture {
     GLenum m_unit;
 
 public:
-    Texture(
-        GLenum unit,
-        const char *filename,
-        bool flip_vert,
-        int format,
-        std::span<std::pair<GLenum, GLint>> params
-    )
-    : m_texture(load_texture(filename, flip_vert, format, params))
-    , m_unit(unit)
+    // resize params are unused if one is 0
+    Texture(GLenum unit, const char *filename, bool flip_vert, int format, int resize_width, int resize_height)
+        : m_texture(load_texture(filename, flip_vert, format, resize_width, resize_height))
+        , m_unit(unit)
     {}
 
-    void set_uniform(ShaderProgram &shader, const char *name) {
-        // TODO: get texture unit GLenum as integer
-        shader
-            .use()
-            .set_uniform_int(name, 0)
-            .set_uniform_int("tex_face", 1);
-    }
-
-    void bind() {
+    Texture &bind() {
         glActiveTexture(m_unit);
         glBindTexture(GL_TEXTURE_2D, m_texture);
+        return *this;
     }
 
 private:
-    GLuint load_texture(const char *filename, bool flip_vert, int format, std::span<std::pair<GLenum, GLint>> params) {
+    GLuint load_texture(const char *filename, bool flip_vert, int format, int resize_width, int resize_height) {
 
         stbi_set_flip_vertically_on_load(flip_vert);
 
-        int width, height, nrChannels;
-        uint8_t *data = stbi_load(filename, &width, &height, &nrChannels, 0); 
-
+        int width, height, _nr_channels;
+        uint8_t *data = stbi_load(filename, &width, &height, &_nr_channels, 0);
         if (data == nullptr)
             std::println("Failed to load image {}", filename);
+
+        if (resize_width && resize_height) {
+
+            void *newdata = stbir_resize_uint8_linear(data, width, height, 0, nullptr, resize_width, resize_height, 0, STBIR_RGB);
+            if (newdata == nullptr)
+                std::println("Failed to resize image");
+
+            width = resize_width;
+            height = resize_height;
+
+            stbi_image_free(data);
+            data = static_cast<uint8_t*>(newdata);
+        }
 
         GLuint texture;
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
-
-        for (auto [name, value] : params)
-            glTexParameteri(GL_TEXTURE_2D, name, value);
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -190,6 +191,37 @@ private:
 
 };
 
+
+class VBO {
+
+    GLuint m_id;
+
+public:
+
+    VBO()
+    : m_id(setup())
+    {}
+
+    VBO &bind() {
+        glBindBuffer(GL_ARRAY_BUFFER, m_id);
+        return *this;
+    }
+
+    VBO &set_data(std::span<Vertex> vertices) {
+        bind();
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+        return *this;
+    }
+
+private:
+
+    GLuint setup() {
+        GLuint id;
+        glGenBuffers(1, &id);
+        return id;
+    }
+
+};
 
 
 int main() {
@@ -211,19 +243,19 @@ int main() {
 
     ShaderProgram shader("vert.glsl", "frag.glsl");
 
-    std::array<std::pair<GLenum, GLint>, 4> tex_params {
-        std::pair { GL_TEXTURE_WRAP_S,     GL_REPEAT },
-        std::pair { GL_TEXTURE_WRAP_T,     GL_REPEAT },
-        std::pair { GL_TEXTURE_MIN_FILTER, GL_LINEAR },
-        std::pair { GL_TEXTURE_MAG_FILTER, GL_LINEAR }
-    };
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    Texture tex_container(GL_TEXTURE0, "container.jpg",   false, GL_RGB,  std::span(tex_params));
-    Texture tex_face     (GL_TEXTURE1, "awesomeface.png", true,  GL_RGBA, std::span(tex_params));
+    Texture tex_container(GL_TEXTURE0, "container.jpg",   false, GL_RGB, 0, 0);
+    Texture tex_face     (GL_TEXTURE1, "awesomeface.png", true,  GL_RGBA, 0, 0);
+    Texture tex_hslogo   (GL_TEXTURE2, "hslogo.png",      true, GL_RGB, 512, 512);
 
     shader.use();
     shader.set_uniform_int("tex_container", 0);
     shader.set_uniform_int("tex_face", 1);
+    shader.set_uniform_int("tex_logo", 2);
 
     GLuint vao, vbo, ebo;
     glGenBuffers(1, &ebo);
@@ -266,6 +298,7 @@ int main() {
 
         tex_container.bind();
         tex_face.bind();
+        tex_hslogo.bind();
 
         shader.use();
         glBindVertexArray(vao);
