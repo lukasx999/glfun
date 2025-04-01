@@ -132,6 +132,58 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
         glfwSetWindowShouldClose(window, 1);
 }
 
+
+class Texture {
+
+    GLuint m_texture;
+    GLenum m_unit;
+
+public:
+    Texture(
+        GLenum unit,
+        const char *filename,
+        bool flip_vert,
+        int format,
+        std::span<std::pair<GLenum, GLint>> params
+    )
+    : m_texture(load_texture(filename, flip_vert, format, params))
+    , m_unit(unit)
+    {}
+
+    void bind() {
+        glActiveTexture(m_unit);
+        glBindTexture(GL_TEXTURE_2D, m_texture);
+    }
+
+private:
+    GLuint load_texture(const char *filename, bool flip_vert, int format, std::span<std::pair<GLenum, GLint>> params) {
+
+        stbi_set_flip_vertically_on_load(flip_vert);
+
+        int width, height, nrChannels;
+        uint8_t *data = stbi_load(filename, &width, &height, &nrChannels, 0); 
+
+        if (data == nullptr)
+            std::println("Failed to load image {}", filename);
+
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        for (auto [name, value] : params)
+            glTexParameteri(GL_TEXTURE_2D, name, value);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        stbi_image_free(data);
+        return texture;
+    }
+
+};
+
+
+
 int main() {
 
     std::array vertices {
@@ -150,48 +202,38 @@ int main() {
     GLFWwindow *window = setup_window();
 
 
+    ShaderProgram shader("vert.glsl", "frag.glsl");
 
-    // TODO: refactor into class
+    std::array<std::pair<GLenum, GLint>, 4> tex_params {
+        std::pair { GL_TEXTURE_WRAP_S,     GL_REPEAT },
+        std::pair { GL_TEXTURE_WRAP_T,     GL_REPEAT },
+        std::pair { GL_TEXTURE_MIN_FILTER, GL_LINEAR },
+        std::pair { GL_TEXTURE_MAG_FILTER, GL_LINEAR }
+    };
 
-    const char *image_filename = "container.jpg";
-    int width, height, nrChannels;
-    uint8_t *data = stbi_load(image_filename, &width, &height, &nrChannels, 0); 
-    if (data == nullptr) {
-        std::println("Failed to load image {}", image_filename);
-    }
+    Texture tex_container(GL_TEXTURE0, "container.jpg", false, GL_RGB, std::span(tex_params));
+    Texture tex_face(GL_TEXTURE1, "awesomeface.png", true, GL_RGBA, std::span(tex_params));
 
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    shader.use();
+    shader.set_uniform_int("tex_container", 0);
+    shader.set_uniform_int("tex_face", 1);
 
-    stbi_image_free(data);
-
-
-    ShaderProgram prog("vert.glsl", "frag.glsl");
-
-    GLuint ebo;
+    GLuint vao, vbo, ebo;
     glGenBuffers(1, &ebo);
-
-    GLuint vao;
     glGenVertexArrays(1, &vao);
-
-    GLuint vbo;
     glGenBuffers(1, &vbo);
 
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     while (!glfwWindowShouldClose(window)) {
+
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+
         glBindVertexArray(vao);
+        shader.use();
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
@@ -199,33 +241,38 @@ int main() {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW); 
 
-        GLuint pos_loc = prog.get_attrib_loc("a_pos");
+
+        GLuint pos_loc = shader.get_attrib_loc("a_pos");
         glVertexAttribPointer(pos_loc, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
         glEnableVertexAttribArray(pos_loc);
 
-        GLuint tex_loc = prog.get_attrib_loc("a_tex_coords");
+        GLuint tex_loc = shader.get_attrib_loc("a_tex_coords");
         glVertexAttribPointer(tex_loc, 2, GL_FLOAT, false, sizeof(Vertex),
                               reinterpret_cast<void*>(offsetof(Vertex, m_tex_coords)));
         glEnableVertexAttribArray(tex_loc);
 
-        GLuint col_loc = prog.get_attrib_loc("a_col");
+        GLuint col_loc = shader.get_attrib_loc("a_col");
         glVertexAttribPointer(col_loc, 3, GL_FLOAT, false, sizeof(Vertex),
                               reinterpret_cast<void*>(offsetof(Vertex, m_color)));
         glEnableVertexAttribArray(col_loc);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        prog.use();
-        glBindVertexArray(vao);
 
+        tex_container.bind();
+        tex_face.bind();
+
+        shader.use();
+        glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
 
         process_inputs(window, vertices.data(), vertices.size());
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
 
     glfwDestroyWindow(window);
     glfwTerminate();
