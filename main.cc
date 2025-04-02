@@ -115,7 +115,7 @@ bool is_key_pressed(GLFWwindow *window, int key) {
     return ret;
 }
 
-void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
+void process_inputs(GLFWwindow *window, std::span<Vertex> vertices) {
     static bool mode = false;
 
     if (is_key_pressed(window, GLFW_KEY_K))
@@ -127,9 +127,8 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-        for (size_t i=0; i < v_size; ++i) {
-            vertices[i].rotate(0.1f, { 1.0f, 1.0f, 1.0f });
-        }
+        for (auto &v : vertices)
+            v.rotate(0.05f, { 1.0f, 1.0f, 1.0f });
     }
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -304,11 +303,10 @@ int main() {
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
-        for (size_t i=0; i < vertices.size(); ++i) {
-            vertices[i].rotate(0.05f, { 1.0f, 1.0f, 1.0f });
-        }
+        for (auto &v : vertices)
+            v.rotate(0.05f, { 1.0f, 1.0f, 1.0f });
 
-        process_inputs(window, vertices.data(), vertices.size());
+        process_inputs(window, vertices);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
