@@ -262,9 +262,6 @@ int main() {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
 
-
-
-
     while (!glfwWindowShouldClose(window)) {
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
