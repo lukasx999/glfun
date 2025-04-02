@@ -8,6 +8,7 @@ out vec4 fragment;
 uniform sampler2D tex_container;
 uniform sampler2D tex_face;
 uniform sampler2D tex_logo;
+uniform sampler2D tex_meme;
 
 void main() {
     // fragment = vec4(color, 1.0f);
@@ -17,5 +18,9 @@ void main() {
     vec4 logo = texture(tex_logo, tex_coords);
 
     // fragment = mix(container, face, 0.2f) * vec4(color, 1.0f);
-    fragment = mix(logo, face, 0.2f) * vec4(color, 1.0f);
+    // fragment = mix(logo, face, 0.2f) * vec4(color, 1.0f);
+
+    // fragment = texture(tex_meme, tex_coords) * vec4(color, 1.0f);
+    fragment = mix(face, texture(tex_meme, tex_coords), 0.9f) * vec4(color, 1.0f);
+
 }

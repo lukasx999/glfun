@@ -128,7 +128,7 @@ void process_inputs(GLFWwindow *window, Vertex *vertices, size_t v_size) {
 
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
         for (size_t i=0; i < v_size; ++i) {
-            vertices[i].rotate(0.01f, { 1.0f, 1.0f, 0.0f });
+            vertices[i].rotate(0.1f, { 1.0f, 1.0f, 1.0f });
         }
     }
 
@@ -251,11 +251,13 @@ int main() {
     Texture tex_container(GL_TEXTURE0, "container.jpg",   false, GL_RGB, 0, 0);
     Texture tex_face     (GL_TEXTURE1, "awesomeface.png", true,  GL_RGBA, 0, 0);
     Texture tex_hslogo   (GL_TEXTURE2, "hslogo.png",      true, GL_RGB, 512, 512);
+    Texture tex_meme     (GL_TEXTURE3, "meme.jpg",      true, GL_RGB, 0, 0);
 
     shader.use();
     shader.set_uniform_int("tex_container", 0);
     shader.set_uniform_int("tex_face", 1);
     shader.set_uniform_int("tex_logo", 2);
+    shader.set_uniform_int("tex_meme", 3);
 
     GLuint vao, vbo, ebo;
     glGenBuffers(1, &ebo);
@@ -296,11 +298,15 @@ int main() {
         tex_container.bind();
         tex_face.bind();
         tex_hslogo.bind();
+        tex_meme.bind();
 
         shader.use();
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
+        for (size_t i=0; i < vertices.size(); ++i) {
+            vertices[i].rotate(0.05f, { 1.0f, 1.0f, 1.0f });
+        }
 
         process_inputs(window, vertices.data(), vertices.size());
         glfwSwapBuffers(window);
