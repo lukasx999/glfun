@@ -226,6 +226,8 @@ private:
 
 int main() {
 
+    std::println("Welcome to OpenGL");
+
     std::array vertices {
         Vertex({  0.5f,  0.5f, 0.0f }, { 1.0f, 1.0f }, Color::RED),   // top right
         Vertex({  0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f }, Color::BLUE),  // bottom right
