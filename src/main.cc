@@ -1,7 +1,4 @@
-#include <iostream>
 #include <print>
-#include <fstream>
-#include <vector>
 #include <array>
 #include <cassert>
 #include <span>
@@ -15,7 +12,11 @@
 #include "glm/gtx/rotate_vector.hpp"
 
 #include "shader.hh"
-#include "lib.hh"
+#include "vertex.hh"
+#include "texture.hh"
+#include "vertexarray.hh"
+#include "vertexbuffer.hh"
+#include "indexbuffer.hh"
 
 #define GLAD_GL_IMPLEMENTATION
 #include "glad/gl.h"
@@ -65,7 +66,7 @@ bool is_key_pressed(GLFWwindow *window, int key) {
     return ret;
 }
 
-void process_inputs(GLFWwindow *window, std::span<Vertex> vertices) {
+void process_inputs(GLFWwindow *window) {
     static bool mode = false;
 
     if (is_key_pressed(window, GLFW_KEY_K))
@@ -75,11 +76,6 @@ void process_inputs(GLFWwindow *window, std::span<Vertex> vertices) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-        for (auto &v : vertices)
-            v.rotate(0.05f, { 1.0f, 1.0f, 1.0f });
-    }
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
@@ -111,12 +107,13 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    Texture tex_container(GL_TEXTURE0, "container.jpg",   false, GL_RGB, 0, 0);
-    Texture tex_face     (GL_TEXTURE1, "awesomeface.png", true,  GL_RGBA, 0, 0);
+    Texture tex_container(GL_TEXTURE0, "./assets/container.jpg",   false, GL_RGB, 0, 0);
+    Texture tex_face     (GL_TEXTURE1, "./assets/awesomeface.png", true,  GL_RGBA, 0, 0);
 
-    shader.use();
-    shader.set_uniform_int("tex_container", 0);
-    shader.set_uniform_int("tex_face", 1);
+    shader
+        .use()
+        .set_uniform_int("tex_container", 0)
+        .set_uniform_int("tex_face", 1);
 
     VertexArray va;
     VertexBuffer vb(vertices);
@@ -131,10 +128,22 @@ int main() {
         .push_attr(col, 3, GL_FLOAT);
 
 
+
     while (!glfwWindowShouldClose(window)) {
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+
+        double x = glm::sin(glfwGetTime() * 2.0f) / 2.0f;
+        float y = glm::sin(glfwGetTime());
+        glm::mat4 mat(1.0f);
+        mat = glm::rotate(mat, y * glm::radians(360.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+        mat = glm::scale(mat, glm::vec3(x * .25 + .5));
+
+        shader.set_uniform_3f("u_position", glm::vec3(x, x, .0f));
+        shader.set_uniform_mat4("u_rot_mat", mat);
+
 
         tex_container.bind();
         tex_face.bind();
@@ -143,12 +152,13 @@ int main() {
         va.bind();
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
-        process_inputs(window, vertices);
+        process_inputs(window);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     glfwDestroyWindow(window);
     glfwTerminate();
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
+
 }
