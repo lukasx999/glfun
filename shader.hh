@@ -8,19 +8,18 @@
 
 
 
-class ShaderProgram {
-private:
+struct Shader {
+
     GLuint m_id;
 
-public:
-    ShaderProgram(const char *filename_vert, const char *filename_frag);
-    ShaderProgram &use();
-    GLuint get_attrib_loc(const char *name);
+    Shader(const char *vert, const char *frag);
+    ~Shader();
+    Shader &use();
+    GLuint get_attrib_loc(const char *name) const;
     // make sure to use() before setting uniforms
-    ShaderProgram &set_uniform_int(const char *name, int value);
+    Shader &set_uniform_int(const char *name, int value);
 
 private:
     std::string read_entire_file(const char *filename);
     GLuint setup_shader(GLenum type, const char *filename);
-    GLuint setup_program(const char *file_vert, const char *file_frag);
 };

@@ -10,26 +10,47 @@
 #include "shader.hh"
 
 
-ShaderProgram::ShaderProgram(const char *filename_vert, const char *filename_frag)
-: m_id(setup_program(filename_vert, filename_frag))
-{}
+Shader::Shader(const char *filename_vert, const char *filename_frag) {
+    GLuint vert = setup_shader(GL_VERTEX_SHADER, filename_vert);
+    GLuint frag = setup_shader(GL_FRAGMENT_SHADER, filename_frag);
 
-ShaderProgram &ShaderProgram::set_uniform_int(const char *name, int value) {
-    int loc = glGetUniformLocation(m_id, name);
-    glUniform1i(loc, value);
+    m_id = glCreateProgram();
+    glAttachShader(m_id, vert);
+    glAttachShader(m_id, frag);
+    glLinkProgram(m_id);
+    glDeleteShader(vert);
+    glDeleteShader(frag);
+
+    int success;
+    char info_log[512] = { 0 };
+    glGetProgramiv(m_id, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        glGetProgramInfoLog(m_id, sizeof(info_log), nullptr, info_log);
+        std::println(stderr, "Shader Program Linkage failed: {}", info_log);
+    }
+
+}
+
+Shader::~Shader() {
+    glDeleteProgram(m_id);
+}
+
+Shader &Shader::set_uniform_int(const char *name, int value) {
+    glUniform1i(glGetUniformLocation(m_id, name), value);
     return *this;
 }
 
-GLuint ShaderProgram::get_attrib_loc(const char *name) {
+GLuint Shader::get_attrib_loc(const char *name) const {
     return glGetAttribLocation(m_id, name);
 }
 
-ShaderProgram &ShaderProgram::use() {
+Shader &Shader::use() {
     glUseProgram(m_id);
     return *this;
 }
 
-std::string ShaderProgram::read_entire_file(const char *filename) {
+std::string Shader::read_entire_file(const char *filename) {
     std::ifstream file(filename);
     return std::string(
         (std::istreambuf_iterator<char>(file)),
@@ -37,7 +58,7 @@ std::string ShaderProgram::read_entire_file(const char *filename) {
     );
 }
 
-GLuint ShaderProgram::setup_shader(GLenum type, const char *filename) {
+GLuint Shader::setup_shader(GLenum type, const char *filename) {
     std::string shader_src = read_entire_file(filename);
     const char *shader_src_raw = shader_src.c_str();
     GLuint shader = glCreateShader(type);
@@ -54,28 +75,4 @@ GLuint ShaderProgram::setup_shader(GLenum type, const char *filename) {
     }
 
     return shader;
-}
-
-GLuint ShaderProgram::setup_program(const char *file_vert, const char *file_frag) {
-
-    GLuint vert = setup_shader(GL_VERTEX_SHADER, file_vert);
-    GLuint frag = setup_shader(GL_FRAGMENT_SHADER, file_frag);
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vert);
-    glAttachShader(program, frag);
-    glLinkProgram(program);
-    glDeleteShader(vert);
-    glDeleteShader(frag);
-
-    int success;
-    char info_log[512] = { 0 };
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-
-    if (!success) {
-        glGetProgramInfoLog(program, sizeof(info_log), nullptr, info_log);
-        std::println(stderr, "Shader Program Linkage failed: {}", info_log);
-    }
-
-    return program;
 }
