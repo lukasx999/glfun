@@ -87,9 +87,6 @@ void process_inputs(GLFWwindow *window, std::span<Vertex> vertices) {
 
 
 
-
-
-
 int main() {
 
     std::array vertices {
@@ -121,27 +118,17 @@ int main() {
     shader.set_uniform_int("tex_container", 0);
     shader.set_uniform_int("tex_face", 1);
 
-    VertexArray vao;
-    VertexBuffer vbo(vertices);
-    IndexBuffer ebo(indices);
-
-    vao.bind();
-
+    VertexArray va;
+    VertexBuffer vb(vertices);
+    IndexBuffer ib(indices);
 
     GLuint pos = shader.get_attrib_loc("a_pos");
-    // glVertexAttribPointer(pos, 3, GL_FLOAT, false, sizeof(Vertex), nullptr);
-    // glEnableVertexAttribArray(pos);
-    vao.add_attr(pos, 3, GL_FLOAT);
-
     GLuint tex = shader.get_attrib_loc("a_tex_coords");
-    // glVertexAttribPointer(tex, 2, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_tex_coords)));
-    // glEnableVertexAttribArray(tex);
-    vao.add_attr(tex, 2, GL_FLOAT);
-
     GLuint col = shader.get_attrib_loc("a_col");
-    // glVertexAttribPointer(col, 3, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_color)));
-    // glEnableVertexAttribArray(col);
-    vao.add_attr(col, 3, GL_FLOAT);
+    va
+        .push_attr(pos, 3, GL_FLOAT)
+        .push_attr(tex, 2, GL_FLOAT)
+        .push_attr(col, 3, GL_FLOAT);
 
 
     while (!glfwWindowShouldClose(window)) {
@@ -152,8 +139,8 @@ int main() {
         tex_container.bind();
         tex_face.bind();
         shader.use();
-        ebo.bind();
-        vao.bind();
+        ib.bind();
+        va.bind();
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
         process_inputs(window, vertices);

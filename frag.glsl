@@ -9,7 +9,6 @@ uniform sampler2D tex_container;
 uniform sampler2D tex_face;
 
 void main() {
-    fragment = vec4(color, 1.0f);
-    // fragment = texture(tex, tex_coords) * vec4(color, 1.0f);
-    // vec4 face = texture(tex_face, tex_coords);
+    // fragment = vec4(color, 1.0f);
+    fragment = texture(tex_face, tex_coords) * vec4(color, 1.0f);
 }

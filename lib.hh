@@ -16,12 +16,6 @@
 #include "vertex.hh"
 
 
-static size_t get_glenum_size(GLenum type) {
-    switch (type) {
-        case GL_FLOAT:
-        return sizeof(float);
-    };
-}
 
 struct VertexArray {
 
@@ -36,11 +30,19 @@ struct VertexArray {
         glDeleteVertexArrays(1, &m_id);
     }
 
-    void add_attr(GLuint loc, GLint size, GLenum type) {
+    VertexArray &push_attr(GLuint loc, GLint size, GLenum type) {
         bind();
-        glVertexAttribPointer(loc, size, type, false, sizeof(Vertex), reinterpret_cast<void*>(m_offset));
+        glVertexAttribPointer(
+            loc,
+            size,
+            type,
+            false,
+            sizeof(Vertex),
+            reinterpret_cast<void*>(m_offset)
+        );
         glEnableVertexAttribArray(loc);
-        m_offset += sizeof(float) * size;
+        m_offset += sizeof_gltype(type) * size;
+        return *this;
     }
 
     VertexArray &bind() {
@@ -51,6 +53,15 @@ struct VertexArray {
     VertexArray &unbind() {
         glBindVertexArray(0);
         return *this;
+    }
+
+private:
+
+    size_t sizeof_gltype(GLenum type) {
+        switch (type) {
+            case GL_FLOAT: return sizeof(float);
+            default: assert(!"unknown type");
+        };
     }
 
 };
