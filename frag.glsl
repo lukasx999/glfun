@@ -20,7 +20,7 @@ void main() {
     // fragment = mix(container, face, 0.2f) * vec4(color, 1.0f);
     // fragment = mix(logo, face, 0.2f) * vec4(color, 1.0f);
 
-    // fragment = texture(tex_meme, tex_coords) * vec4(color, 1.0f);
-    fragment = mix(face, texture(tex_meme, tex_coords), 0.9f) * vec4(color, 1.0f);
+    fragment = texture(tex_meme, tex_coords) * vec4(color, 1.0f);
+    // fragment = mix(face, texture(tex_meme, tex_coords), 0.9f) * vec4(color, 1.0f);
 
 }
