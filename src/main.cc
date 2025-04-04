@@ -26,6 +26,7 @@ constexpr int width  = 1600;
 constexpr int height = 900;
 
 
+
 GLFWwindow *setup_window() {
 
     if (!glfwInit())
@@ -56,7 +57,6 @@ GLFWwindow *setup_window() {
     return window;
 }
 
-
 bool is_key_pressed(GLFWwindow *window, int key) {
 
     static bool old = false;
@@ -86,16 +86,73 @@ void process_inputs(GLFWwindow *window) {
 int main() {
 
     std::array vertices {
-        Vertex({  0.5f,  0.5f, 0.0f }, { 1.0f, 1.0f }, Color::RED),   // top right
-        Vertex({  0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f }, Color::BLUE),  // bottom right
-        Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f }, Color::GREEN), // bottom left
-        Vertex({ -0.5f,  0.5f, 0.0f }, { 0.0f, 1.0f }, Color::CYAN),  // top left
+        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f }),
+        Vertex({  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f }),
+        Vertex({  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f }),
+        Vertex({  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f }),
+        Vertex({ -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f }),
+
+        Vertex({ -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f }),
+        Vertex({  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f }),
+        Vertex({ -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f }),
+
+        Vertex({ -0.5f,  0.5f,  0.5f }, { 1.0f, 0.0f }),
+        Vertex({ -0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f }),
+        Vertex({ -0.5f,  0.5f,  0.5f }, { 1.0f, 0.0f }),
+
+        Vertex({ 0.5f,  0.5f,  0.5f }, {1.0f, 0.0f }),
+        Vertex({ 0.5f,  0.5f, -0.5f }, {1.0f, 1.0f }),
+        Vertex({ 0.5f, -0.5f, -0.5f }, {0.0f, 1.0f }),
+        Vertex({ 0.5f, -0.5f, -0.5f }, {0.0f, 1.0f }),
+        Vertex({ 0.5f, -0.5f,  0.5f }, {0.0f, 0.0f }),
+        Vertex({ 0.5f,  0.5f,  0.5f }, {1.0f, 0.0f }),
+
+        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f }),
+        Vertex({  0.5f, -0.5f, -0.5f }, { 1.0f, 1.0f }),
+        Vertex({  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f }),
+        Vertex({  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f }),
+        Vertex({ -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f }),
+        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f }),
+
+        Vertex({ -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f }),
+        Vertex({  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f }, { 1.0f, 0.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f }, { 1.0f, 0.0f }),
+        Vertex({ -0.5f,  0.5f,  0.5f }, { 0.0f, 0.0f }),
+        Vertex({ -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f }),
     };
 
-    std::array<unsigned int, 6> indices {
-        0, 1, 3, // first triangle
-        1, 2, 3, // second triangle
+    std::array positions = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f),
     };
+
+    // std::array vertices {
+    //     Vertex({  0.5f,  0.5f, 0.0f }, { 1.0f, 1.0f }, Color::RED),   // top right
+    //     Vertex({  0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f }, Color::BLUE),  // bottom right
+    //     Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f }, Color::GREEN), // bottom left
+    //     Vertex({ -0.5f,  0.5f, 0.0f }, { 0.0f, 1.0f }, Color::CYAN),  // top left
+    // };
+
+    // std::array<unsigned int, 6> indices {
+    //     0, 1, 3, // first triangle
+    //     1, 2, 3, // second triangle
+    // };
 
 
     GLFWwindow *window = setup_window();
@@ -117,7 +174,7 @@ int main() {
 
     VertexArray va;
     VertexBuffer vb(vertices);
-    IndexBuffer ib(indices);
+    // IndexBuffer ib(indices);
 
     GLuint pos = shader.get_attrib_loc("a_pos");
     GLuint tex = shader.get_attrib_loc("a_tex_coords");
@@ -128,12 +185,13 @@ int main() {
         .push_attr(col, 3, GL_FLOAT);
 
 
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window)) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
+        for (size_t i=0; i < positions.size(); ++i) {}
 
         double x = glm::sin(glfwGetTime() * 2.0f) / 2.0f;
         float y = glm::sin(glfwGetTime());
@@ -148,9 +206,10 @@ int main() {
         tex_container.bind();
         tex_face.bind();
         shader.use();
-        ib.bind();
         va.bind();
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+        // ib.bind();
+        // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
         process_inputs(window);
         glfwSwapBuffers(window);

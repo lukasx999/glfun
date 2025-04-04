@@ -32,6 +32,7 @@ struct Vertex {
     glm::vec3 m_color;
 
     Vertex(glm::vec3 pos, glm::vec2 tex_coords, Color color);
+    Vertex(glm::vec3 pos, glm::vec2 tex_coords);
     Vertex &rotate(float angle, glm::vec3 normal);
 
 };
