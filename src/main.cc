@@ -165,12 +165,12 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     Texture tex_container(GL_TEXTURE0, "./assets/container.jpg",   false, GL_RGB, 0, 0);
-    Texture tex_face     (GL_TEXTURE1, "./assets/awesomeface.png", true,  GL_RGBA, 0, 0);
+    Texture tex_cpp(GL_TEXTURE1, "./assets/c++.png", true,  GL_RGBA, 0, 0);
 
     shader
         .use()
         .set_uniform_int("tex_container", 0)
-        .set_uniform_int("tex_face", 1);
+        .set_uniform_int("tex_cpp", 1);
 
     VertexArray va;
     VertexBuffer vb(vertices);
@@ -204,7 +204,7 @@ int main() {
 
 
         tex_container.bind();
-        tex_face.bind();
+        tex_cpp.bind();
         shader.use();
         va.bind();
         glDrawArrays(GL_TRIANGLES, 0, vertices.size());
