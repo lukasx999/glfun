@@ -164,7 +164,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    Texture tex_container(GL_TEXTURE0, "./assets/container.jpg",   false, GL_RGB, 0, 0);
+    Texture tex_container(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB, 0, 0);
     Texture tex_cpp(GL_TEXTURE1, "./assets/c++.png", true,  GL_RGBA, 0, 0);
 
     shader
@@ -188,10 +188,10 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
-    while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (size_t i=0; i < positions.size(); ++i) {}
+    while (!glfwWindowShouldClose(window)) {
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         double x = glm::sin(glfwGetTime() * 2.0f) / 2.0f;
         float y = glm::sin(glfwGetTime());
@@ -201,7 +201,6 @@ int main() {
 
         shader.set_uniform_3f("u_position", glm::vec3(x, x, .0f));
         shader.set_uniform_mat4("u_rot_mat", mat);
-
 
         tex_container.bind();
         tex_cpp.bind();
