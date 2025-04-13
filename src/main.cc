@@ -11,12 +11,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/rotate_vector.hpp"
 
-#include "shader.hh"
-#include "vertex.hh"
-#include "texture.hh"
-#include "vertexarray.hh"
-#include "vertexbuffer.hh"
-#include "indexbuffer.hh"
+#include "lib.hh"
 
 #define GLAD_GL_IMPLEMENTATION
 #include "glad/gl.h"
@@ -72,10 +67,7 @@ void process_inputs(GLFWwindow *window) {
     if (is_key_pressed(window, GLFW_KEY_K))
         mode = !mode;
 
-    if (mode)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, mode ? GL_LINE : GL_FILL);
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);

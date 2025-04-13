@@ -9,7 +9,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "shader.hh"
+#include "lib.hh"
 
 
 Shader::Shader(const char *filename_vert, const char *filename_frag) {

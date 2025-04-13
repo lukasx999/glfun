@@ -1,4 +1,4 @@
-#include "vertex.hh"
+#include "lib.hh"
 
 
 glm::vec3 color_to_vec3(Color color) {
