@@ -12,7 +12,8 @@ uniform mat4 u_rot_mat;
 
 void main() {
 
-    gl_Position = vec4(a_pos + u_position, 1.0f) * u_rot_mat;
+    // gl_Position = vec4(a_pos + u_position, 1.0f) * u_rot_mat;
+    gl_Position = vec4(a_pos, 1.0f) * u_rot_mat;
 
     // gl_Position = vec4(a_pos, 1.0f);
     color = a_col;
