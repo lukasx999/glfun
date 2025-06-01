@@ -29,11 +29,11 @@ glm::vec3 color_to_vec3(Color color);
 struct Vertex {
 
     glm::vec3 m_pos;
-    glm::vec2 m_tex_coords;
+    glm::vec2 m_uv;
     glm::vec3 m_color;
 
-    Vertex(glm::vec3 pos, glm::vec2 tex_coords, Color color);
-    Vertex(glm::vec3 pos, glm::vec2 tex_coords);
+    Vertex(glm::vec3 pos, glm::vec2 uv, Color color);
+    Vertex(glm::vec3 pos, glm::vec2 uv);
     Vertex &rotate(float angle, glm::vec3 normal);
 
 };
@@ -103,6 +103,7 @@ struct Shader {
 private:
     std::string read_entire_file(const char *filename);
     GLuint setup_shader(GLenum type, const char *filename);
+
 };
 
 

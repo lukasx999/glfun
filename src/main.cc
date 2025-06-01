@@ -185,27 +185,38 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (auto &pos : positions) {
+        // for (auto &pos : positions) {
+        //
+        //     // double x = glm::sin(glfwGetTime() * 2.0f) / 2.0f;
+        //     // float y = glm::sin(glfwGetTime());
+        //     // shader.set_uniform_3f("u_position", glm::vec3(x, x, .0f));
+        //     // mat = glm::rotate(mat, y * glm::radians(360.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+        //     // mat = glm::scale(mat, glm::vec3(x * .25 + .5));
+        //     glm::mat4 mat(1.0f);
+        //     mat = glm::translate(mat, pos);
+        //     mat = glm::rotate(mat, static_cast<float>(glfwGetTime()) * glm::radians(180.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
+        //
+        //     shader.set_uniform_mat4("u_rot_mat", mat);
+        //
+        //     tex_container.bind();
+        //     tex_cpp.bind();
+        //     shader.use();
+        //     va.bind();
+        //     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+        //     // ib.bind();
+        //     // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+        // }
 
-            // double x = glm::sin(glfwGetTime() * 2.0f) / 2.0f;
-            // float y = glm::sin(glfwGetTime());
-            // shader.set_uniform_3f("u_position", glm::vec3(x, x, .0f));
-            // mat = glm::rotate(mat, y * glm::radians(360.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-            // mat = glm::scale(mat, glm::vec3(x * .25 + .5));
-            glm::mat4 mat(1.0f);
-            mat = glm::translate(mat, pos);
-            mat = glm::rotate(mat, static_cast<float>(glfwGetTime()) * glm::radians(180.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
-
-            shader.set_uniform_mat4("u_rot_mat", mat);
-
-            tex_container.bind();
-            tex_cpp.bind();
-            shader.use();
-            va.bind();
-            glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-            // ib.bind();
-            // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
-        }
+        glm::mat4 mat(1.0f);
+        mat = glm::rotate(mat, static_cast<float>(glfwGetTime()) * glm::radians(180.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
+        shader.set_uniform_mat4("u_rot_mat", mat);
+        tex_container.bind();
+        tex_cpp.bind();
+        shader.use();
+        va.bind();
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+        // ib.bind();
+        // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
 
         process_inputs(window);
