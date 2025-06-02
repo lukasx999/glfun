@@ -3,7 +3,6 @@
 #include <cassert>
 #include <span>
 
-
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -128,62 +127,65 @@ int main() {
 
 
 
+    // TODO: consider an OO wrapper for glfw
     GLFWwindow *window = setup_glfw();
+    {
 
-    Shader shader("vert.glsl", "frag.glsl");
+        Shader shader("vert.glsl", "frag.glsl");
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    Texture tex_container(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB, 0, 0);
-    Texture tex_cpp(GL_TEXTURE1, "./assets/c++.png", true,  GL_RGBA, 0, 0);
+        Texture tex_container(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB, 0, 0);
+        Texture tex_cpp(GL_TEXTURE1, "./assets/c++.png", true,  GL_RGBA, 0, 0);
 
-    shader
-        .use()
-        .set_uniform_int("tex_container", 0)
-        .set_uniform_int("tex_cpp", 1);
+        shader
+            .use()
+            .set_uniform_int("tex_container", 0)
+            .set_uniform_int("tex_cpp", 1);
 
-    VertexArray va;
-    VertexBuffer vb(vertices);
+        VertexArray va;
+        VertexBuffer vb(vertices);
 
-    GLuint pos = shader.get_attrib_loc("a_pos");
-    GLuint tex = shader.get_attrib_loc("a_tex_coords");
-    GLuint col = shader.get_attrib_loc("a_col");
-    va
-        .push_attr(pos, 3, GL_FLOAT)
-        .push_attr(tex, 2, GL_FLOAT)
-        .push_attr(col, 3, GL_FLOAT);
-
-
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glEnable(GL_DEPTH_TEST);
+        GLuint pos = shader.get_attrib_loc("a_pos");
+        GLuint tex = shader.get_attrib_loc("a_tex_coords");
+        GLuint col = shader.get_attrib_loc("a_col");
+        va
+            .push_attr(pos, 3, GL_FLOAT)
+            .push_attr(tex, 2, GL_FLOAT)
+            .push_attr(col, 3, GL_FLOAT);
 
 
-    while (!glfwWindowShouldClose(window)) {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glEnable(GL_DEPTH_TEST);
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 mat(1.0f);
-        mat = glm::rotate(
-            mat,
-            static_cast<float>(glfwGetTime()) * glm::radians(180.0f),
-            glm::vec3(0.5f, 1.0f, 0.0f)
-        );
-        shader.set_uniform_mat4("u_rot_mat", mat);
-        tex_container.bind();
-        tex_cpp.bind();
-        shader.use();
-        va.bind();
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+        while (!glfwWindowShouldClose(window)) {
 
-        process_inputs(window);
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glm::mat4 mat(1.0f);
+            mat = glm::rotate(
+                mat,
+                static_cast<float>(glfwGetTime()) * glm::radians(180.0f),
+                glm::vec3(0.5f, 1.0f, 0.0f)
+            );
+            shader.set_uniform_mat4("u_rot_mat", mat);
+            tex_container.bind();
+            tex_cpp.bind();
+            shader.use();
+            va.bind();
+            glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
+            process_inputs(window);
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+
     }
-
     glfwDestroyWindow(window);
     glfwTerminate();
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
