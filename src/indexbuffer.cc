@@ -1,4 +1,4 @@
-#include "lib.hh"
+#include "indexbuffer.hh"
 
 
 IndexBuffer::IndexBuffer(std::span<unsigned int> indices) : m_count(indices.size()) {

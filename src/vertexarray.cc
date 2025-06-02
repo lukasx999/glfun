@@ -1,4 +1,6 @@
-#include "lib.hh"
+#include "vertexarray.hh"
+#include "vertex.hh"
+#include <utility>
 
 
 
@@ -35,10 +37,10 @@ VertexArray &VertexArray::unbind() {
     return *this;
 }
 
-
-inline size_t VertexArray::sizeof_gltype(GLenum type) {
+[[nodiscard]] size_t VertexArray::sizeof_gltype(GLenum type) const {
     switch (type) {
         case GL_FLOAT: return sizeof(float);
         default: assert(!"unknown type");
     };
+    std::unreachable();
 }

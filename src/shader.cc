@@ -9,7 +9,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "lib.hh"
+#include "shader.hh"
+
 
 
 Shader::Shader(const char *filename_vert, const char *filename_frag) {
@@ -58,7 +59,7 @@ Shader &Shader::set_uniform_mat4(const char *name, glm::mat4 value) {
     return *this;
 }
 
-GLuint Shader::get_attrib_loc(const char *name) const {
+[[nodiscard]] GLuint Shader::get_attrib_loc(const char *name) const {
     return glGetAttribLocation(m_id, name);
 }
 

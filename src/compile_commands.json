@@ -1,0 +1,44 @@
+[
+{
+  "directory": "/home/lukas/code/repos/glcube/src",
+  "command": "/usr/bin/c++  -I/home/lukas/code/repos/glcube/src/lib -std=gnu++23 -o CMakeFiles/vertex.dir/vertex.cc.o -c /home/lukas/code/repos/glcube/src/vertex.cc",
+  "file": "/home/lukas/code/repos/glcube/src/vertex.cc",
+  "output": "CMakeFiles/vertex.dir/vertex.cc.o"
+},
+{
+  "directory": "/home/lukas/code/repos/glcube/src",
+  "command": "/usr/bin/c++  -I/home/lukas/code/repos/glcube/src/lib -std=gnu++23 -o CMakeFiles/vertexarray.dir/vertexarray.cc.o -c /home/lukas/code/repos/glcube/src/vertexarray.cc",
+  "file": "/home/lukas/code/repos/glcube/src/vertexarray.cc",
+  "output": "CMakeFiles/vertexarray.dir/vertexarray.cc.o"
+},
+{
+  "directory": "/home/lukas/code/repos/glcube/src",
+  "command": "/usr/bin/c++  -I/home/lukas/code/repos/glcube/src/lib -std=gnu++23 -o CMakeFiles/shader.dir/shader.cc.o -c /home/lukas/code/repos/glcube/src/shader.cc",
+  "file": "/home/lukas/code/repos/glcube/src/shader.cc",
+  "output": "CMakeFiles/shader.dir/shader.cc.o"
+},
+{
+  "directory": "/home/lukas/code/repos/glcube/src",
+  "command": "/usr/bin/c++  -I/home/lukas/code/repos/glcube/src/lib -std=gnu++23 -o CMakeFiles/texture.dir/texture.cc.o -c /home/lukas/code/repos/glcube/src/texture.cc",
+  "file": "/home/lukas/code/repos/glcube/src/texture.cc",
+  "output": "CMakeFiles/texture.dir/texture.cc.o"
+},
+{
+  "directory": "/home/lukas/code/repos/glcube/src",
+  "command": "/usr/bin/c++  -I/home/lukas/code/repos/glcube/src/lib -std=gnu++23 -o CMakeFiles/vertexbuffer.dir/vertexbuffer.cc.o -c /home/lukas/code/repos/glcube/src/vertexbuffer.cc",
+  "file": "/home/lukas/code/repos/glcube/src/vertexbuffer.cc",
+  "output": "CMakeFiles/vertexbuffer.dir/vertexbuffer.cc.o"
+},
+{
+  "directory": "/home/lukas/code/repos/glcube/src",
+  "command": "/usr/bin/c++  -I/home/lukas/code/repos/glcube/src/lib -std=gnu++23 -o CMakeFiles/indexbuffer.dir/indexbuffer.cc.o -c /home/lukas/code/repos/glcube/src/indexbuffer.cc",
+  "file": "/home/lukas/code/repos/glcube/src/indexbuffer.cc",
+  "output": "CMakeFiles/indexbuffer.dir/indexbuffer.cc.o"
+},
+{
+  "directory": "/home/lukas/code/repos/glcube/src",
+  "command": "/usr/bin/c++  -I/home/lukas/code/repos/glcube/src/lib -std=gnu++23 -o CMakeFiles/cube.dir/main.cc.o -c /home/lukas/code/repos/glcube/src/main.cc",
+  "file": "/home/lukas/code/repos/glcube/src/main.cc",
+  "output": "CMakeFiles/cube.dir/main.cc.o"
+}
+]
