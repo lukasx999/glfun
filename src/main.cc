@@ -24,31 +24,25 @@
 constexpr int WIDTH  = 1600;
 constexpr int HEIGHT = 900;
 
-
-
 [[nodiscard]] static GLFWwindow *setup_glfw() {
 
-    glfwSetErrorCallback([](int _error_code, const char* description) {
-        (void) _error_code;
+    glfwSetErrorCallback([](__attribute__((unused)) int error_code, const char* description) {
         std::println(stderr, "GLFW ERROR: {}", description);
     });
 
     glfwInit();
-
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Cube", nullptr, nullptr);
-
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
     gladLoadGL(glfwGetProcAddress);
 
     glfwSetFramebufferSizeCallback(
         window,
-        [](GLFWwindow *_win, int w, int h) {
-            (void) _win;
+        [](__attribute__((unused)) GLFWwindow *win, int w, int h) {
             glViewport(0, 0, w, h);
         }
     );
@@ -127,7 +121,6 @@ int main() {
 
 
 
-    // TODO: consider an OO wrapper for glfw
     GLFWwindow *window = setup_glfw();
     {
 
@@ -185,6 +178,7 @@ int main() {
         }
 
     }
+
     glfwDestroyWindow(window);
     glfwTerminate();
     return EXIT_SUCCESS;

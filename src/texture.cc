@@ -11,7 +11,14 @@
 
 
 // resize params are unused if one is 0
-Texture::Texture(GLenum unit, const char *filename, bool flip_vert, int format, int resize_width, int resize_height)
+Texture::Texture(
+    GLenum unit,
+    const char *filename,
+    bool flip_vert,
+    int format,
+    int resize_width,
+    int resize_height
+)
     : m_texture(load_texture(filename, flip_vert, format, resize_width, resize_height))
     , m_unit(unit)
 {}
@@ -22,7 +29,13 @@ Texture &Texture::bind() {
     return *this;
 }
 
-GLuint Texture::load_texture(const char *filename, bool flip_vert, int format, int resize_width, int resize_height) {
+GLuint Texture::load_texture(
+    const char *filename,
+    bool flip_vert,
+    int format,
+    int resize_width,
+    int resize_height
+) {
 
     stbi_set_flip_vertically_on_load(flip_vert);
 

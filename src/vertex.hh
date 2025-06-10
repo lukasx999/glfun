@@ -24,7 +24,7 @@ enum class Color {
     CYAN,
 };
 
-glm::vec3 color_to_vec3(Color color);
+[[nodiscard]] constexpr glm::vec3 color_to_vec3(Color color);
 
 struct Vertex {
 

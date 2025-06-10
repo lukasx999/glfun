@@ -26,6 +26,6 @@ public:
     VertexArray &unbind();
 
 private:
-    [[nodiscard]] size_t sizeof_gltype(GLenum type) const;
+    [[nodiscard]] constexpr size_t sizeof_gltype(GLenum type) const;
 
 };

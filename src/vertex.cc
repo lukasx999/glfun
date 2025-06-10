@@ -2,7 +2,8 @@
 
 
 
-glm::vec3 color_to_vec3(Color color) {
+
+[[nodiscard]] constexpr glm::vec3 color_to_vec3(Color color) {
     switch (color) {
         case Color::BLACK:   return glm::vec3(0.0f);
         case Color::WHITE:   return glm::vec3(1.0f);

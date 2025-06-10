@@ -37,7 +37,7 @@ VertexArray &VertexArray::unbind() {
     return *this;
 }
 
-[[nodiscard]] size_t VertexArray::sizeof_gltype(GLenum type) const {
+[[nodiscard]] constexpr size_t VertexArray::sizeof_gltype(GLenum type) const {
     switch (type) {
         case GL_FLOAT: return sizeof(float);
         default: assert(!"unknown type");
