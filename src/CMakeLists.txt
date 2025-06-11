@@ -14,5 +14,6 @@ add_library(texture texture.cc)
 add_library(vertexbuffer vertexbuffer.cc)
 add_library(indexbuffer indexbuffer.cc)
 add_library(vertexarray vertexarray.cc)
+add_library(impl impl.cc)
 
-target_link_libraries(cube shader vertex texture vertexbuffer indexbuffer vertexarray glfw)
+target_link_libraries(cube shader vertex texture vertexbuffer indexbuffer vertexarray impl glfw)

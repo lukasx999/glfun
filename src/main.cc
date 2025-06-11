@@ -2,6 +2,7 @@
 #include <array>
 #include <cassert>
 #include <span>
+#include <fstream>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -17,7 +18,6 @@
 #include "shader.hh"
 #include "texture.hh"
 
-#define GLAD_GL_IMPLEMENTATION
 #include "glad/gl.h"
 
 
@@ -50,7 +50,7 @@ constexpr int HEIGHT = 900;
     return window;
 }
 
-static bool is_key_pressed(GLFWwindow *window, int key) {
+[[nodiscard]] static bool is_key_rising(GLFWwindow *window, int key) {
 
     static bool old = false;
     bool pressed = glfwGetKey(window, key) == GLFW_PRESS;
@@ -62,7 +62,7 @@ static bool is_key_pressed(GLFWwindow *window, int key) {
 static void process_inputs(GLFWwindow *window) {
     static bool mode = false;
 
-    if (is_key_pressed(window, GLFW_KEY_K))
+    if (is_key_rising(window, GLFW_KEY_K))
         mode = !mode;
 
     glPolygonMode(GL_FRONT_AND_BACK, mode ? GL_LINE : GL_FILL);
@@ -70,8 +70,6 @@ static void process_inputs(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
 }
-
-
 
 int main() {
 
@@ -121,6 +119,12 @@ int main() {
 
 
 
+    // TODO:
+    // std::ifstream file("model.obj");
+    // std::string obj((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+
+
+
     GLFWwindow *window = setup_glfw();
     {
 
@@ -145,6 +149,7 @@ int main() {
         GLuint pos = shader.get_attrib_loc("a_pos");
         GLuint tex = shader.get_attrib_loc("a_tex_coords");
         GLuint col = shader.get_attrib_loc("a_col");
+
         va
             .push_attr(pos, 3, GL_FLOAT)
             .push_attr(tex, 2, GL_FLOAT)
@@ -159,13 +164,6 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glm::mat4 mat(1.0f);
-            mat = glm::rotate(
-                mat,
-                static_cast<float>(glfwGetTime()) * glm::radians(180.0f),
-                glm::vec3(0.5f, 1.0f, 0.0f)
-            );
-            shader.set_uniform_mat4("u_rot_mat", mat);
             tex_container.bind();
             tex_cpp.bind();
             shader.use();

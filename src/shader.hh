@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 
 #include "glad/gl.h"
@@ -16,7 +17,7 @@ class Shader {
     GLuint m_id;
 
 public:
-    Shader(const char *vert, const char *frag);
+    Shader(const char *filename_vert, const char *filename_frag);
     ~Shader();
 
     Shader &use();
@@ -28,7 +29,8 @@ public:
     Shader &set_uniform_mat4(const char *name, glm::mat4 value);
 
 private:
-    std::string read_entire_file(const char *filename);
-    GLuint setup_shader(GLenum type, const char *filename);
+    [[nodiscard]] std::string read_entire_file(const char *filename) const;
+    [[nodiscard]] GLuint link_shaders(GLuint vert, GLuint frag) const;
+    [[nodiscard]] GLuint compile_shader(GLenum type, const char *filename) const;
 
 };
