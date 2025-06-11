@@ -101,6 +101,7 @@ static void process_inputs(GLFWwindow *window) {
         const std::regex re_tex(std::format(R"(vt\s+({0})\s+({0}){1})", re_float, re_comment));
         const std::regex re_norm(std::format(R"(vn\s+({0})\s+({0})\s+({0}){1})", re_float, re_comment));
         const std::regex re_face(std::format(R"(f\s+{0}\s+{0}\s+{0}{1})", re_idx, re_comment));
+        const std::regex re_face_vertex(std::format(R"(f\s+({0})\s+({0})\s+({0}){1})", re_num, re_comment));
 
         if (std::regex_match(line, matches, re_vertex)) {
             float x = stof(matches.str(1));
@@ -129,18 +130,27 @@ static void process_inputs(GLFWwindow *window) {
             vertex_idx.push_back(stoi(matches.str(7)));
             uv_idx    .push_back(stoi(matches.str(8)));
             norm_idx  .push_back(stoi(matches.str(9)));
+
+        } else if (std::regex_match(line, matches, re_face_vertex)) {
+            vertex_idx.push_back(stoi(matches.str(1)));
+            vertex_idx.push_back(stoi(matches.str(2)));
+            vertex_idx.push_back(stoi(matches.str(3)));
         }
 
     }
 
     std::vector<Vertex> verts;
 
-    assert(vertex_idx.size() == uv_idx.size());
-    assert(vertex_idx.size() == norm_idx.size());
-    assert(uv_idx.size() == norm_idx.size());
+    // assert(vertex_idx.size() == uv_idx.size());
+    // assert(vertex_idx.size() == norm_idx.size());
+    // assert(uv_idx.size() == norm_idx.size());
 
-    for (auto &&[vert, uv, norm] : std::views::zip(vertex_idx, uv_idx, norm_idx)) {
-        verts.push_back(Vertex(tmp_vertices[vert-1], tmp_uv[uv-1]));
+    // for (auto &&[vert, uv, norm] : std::views::zip(vertex_idx, uv_idx, norm_idx)) {
+    //     verts.push_back(Vertex(tmp_vertices[vert-1], tmp_uv[uv-1]));
+    // }
+
+    for (auto &v : vertex_idx) {
+        verts.push_back(tmp_vertices[v-1]);
     }
 
     return verts;
@@ -156,7 +166,7 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
-    auto vertices = parse_obj("model.obj");
+    auto vertices = parse_obj("cow.obj");
 
     // for (auto &v : vertices) {
     //     std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
