@@ -22,8 +22,8 @@ class Texture {
 
 public:
     // unit is GL_TEXTURE0 for example
-    Texture(GLenum unit, const char *filename, bool flip_vert, int format);
-    Texture(GLenum unit, const char *filename, bool flip_vert, int format, int resize_width, int resize_height);
+    Texture(GLenum unit, const char *filename, bool flip_vert, GLenum format);
+    Texture(GLenum unit, const char *filename, bool flip_vert, GLenum format, int resize_width, int resize_height);
     Texture &bind();
 
 private:
@@ -42,7 +42,7 @@ private:
     [[nodiscard]] GLuint load_texture(
         const char *filename,
         bool flip_vert,
-        int format,
+        GLenum format,
         int resize_width,
         int resize_height
     ) const;
@@ -50,11 +50,11 @@ private:
     [[nodiscard]] GLuint load_texture(
         const char *filename,
         bool flip_vert,
-        int format
+        GLenum format
     ) const;
 
     [[nodiscard]] GLuint create_texture(
-        int format,
+        GLenum format,
         int width,
         int height,
         StbiData data

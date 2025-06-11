@@ -16,7 +16,7 @@ Texture::Texture(
     GLenum unit,
     const char *filename,
     bool flip_vert,
-    int format,
+    GLenum format,
     int resize_width,
     int resize_height
 )
@@ -28,7 +28,7 @@ Texture::Texture(
     GLenum unit,
     const char *filename,
     bool flip_vert,
-    int format
+    GLenum format
 )
     : m_texture(load_texture(filename, flip_vert, format))
     , m_unit(unit)
@@ -40,7 +40,7 @@ Texture &Texture::bind() {
     return *this;
 }
 
-[[nodiscard]] GLuint Texture::create_texture(int format, int width, int height, Texture::StbiData data) const {
+[[nodiscard]] GLuint Texture::create_texture(GLenum format, int width, int height, Texture::StbiData data) const {
     GLuint tex;
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
@@ -76,7 +76,7 @@ Texture::load_image(const char *filename, bool flip_vert) const {
 [[nodiscard]] GLuint Texture::load_texture(
     const char *filename,
     bool flip_vert,
-    int format,
+    GLenum format,
     int resize_width,
     int resize_height
 ) const {
@@ -107,7 +107,7 @@ Texture::load_image(const char *filename, bool flip_vert) const {
     return create_texture(format, width, height, std::move(data));
 }
 
-[[nodiscard]] GLuint Texture::load_texture(const char *filename, bool flip_vert, int format) const {
+[[nodiscard]] GLuint Texture::load_texture(const char *filename, bool flip_vert, GLenum format) const {
     auto [data, width, height] = load_image(filename, flip_vert);
     return create_texture(format, width, height, std::move(data));
 }

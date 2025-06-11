@@ -1,6 +1,7 @@
 #include <print>
 #include <vector>
 #include <array>
+#include <ranges>
 #include <cassert>
 #include <span>
 #include <fstream>
@@ -142,6 +143,10 @@ static std::vector<Vertex> parse_obj(const char *filename) {
         verts.push_back(Vertex(vert));
     }
 
+    for (auto &&[vert, uv, norm] : std::views::zip(vertex_idx, uv_idx, norm_idx)) {
+        verts.push_back(Vertex(tmp_vertices[vert-1], tmp_uv[uv-1]));
+    }
+
     return verts;
 
 }
@@ -169,20 +174,21 @@ int main() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        shader.use();
+        shader.use()
+              .set_uniform_int("tex", 0);
 
         VertexArray va;
         VertexBuffer vb(vertices);
-        // IndexBuffer ib;
+
+        Texture texture(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB);
 
         GLuint pos = shader.get_attrib_loc("a_pos");
-        GLuint tex = shader.get_attrib_loc("a_tex_coords");
+        GLuint uv  = shader.get_attrib_loc("a_uv");
         GLuint col = shader.get_attrib_loc("a_col");
 
-        va
-            .push_attr(pos, 3, GL_FLOAT)
-            .push_attr(tex, 2, GL_FLOAT)
-            .push_attr(col, 3, GL_FLOAT);
+        va.push_attr(pos, 3, GL_FLOAT)
+          .push_attr(uv,  2, GL_FLOAT)
+          .push_attr(col, 3, GL_FLOAT);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
@@ -191,6 +197,15 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            glm::mat4 mat(1.0f);
+            mat = glm::rotate(
+                mat,
+                static_cast<float>(glfwGetTime()) * glm::radians(180.0f),
+                glm::vec3(0.5f, 1.0f, 0.0f)
+            );
+            shader.set_uniform_mat4("u_mat", mat);
+
+            texture.bind();
             shader.use();
             va.bind();
             glDrawArrays(GL_TRIANGLES, 0, vertices.size());
