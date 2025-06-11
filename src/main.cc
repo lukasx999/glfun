@@ -29,7 +29,7 @@ constexpr int HEIGHT = 900;
 
 [[nodiscard]] static GLFWwindow *setup_glfw() {
 
-    glfwSetErrorCallback([](__attribute__((unused)) int error_code, const char* description) {
+    glfwSetErrorCallback([]([[maybe_unused]] int error_code, const char* description) {
         std::println(stderr, "GLFW ERROR: {}", description);
     });
 
@@ -45,7 +45,7 @@ constexpr int HEIGHT = 900;
 
     glfwSetFramebufferSizeCallback(
         window,
-        [](__attribute__((unused)) GLFWwindow *win, int w, int h) {
+        []([[maybe_unused]] GLFWwindow *win, int w, int h) {
             glViewport(0, 0, w, h);
         }
     );
@@ -53,6 +53,7 @@ constexpr int HEIGHT = 900;
     return window;
 }
 
+// TODO: not working correctly -> investigate
 [[nodiscard]] static bool is_key_rising(GLFWwindow *window, int key) {
 
     static bool old = false;
@@ -166,7 +167,7 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
-    auto vertices = parse_obj("cow.obj");
+    auto vertices = parse_obj("assets/teapot.obj");
 
     // for (auto &v : vertices) {
     //     std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
@@ -188,7 +189,7 @@ int main() {
         VertexArray va;
         VertexBuffer vb(vertices);
 
-        Texture texture(GL_TEXTURE0, "./texture.png", false, GL_RGBA);
+        // Texture texture(GL_TEXTURE0, "./texture.png", false, GL_RGBA);
 
         GLuint pos = shader.get_attrib_loc("a_pos");
         GLuint uv  = shader.get_attrib_loc("a_uv");
@@ -200,20 +201,32 @@ int main() {
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
+        float u_zoom = 1;
+
+        glfwSetWindowUserPointer(window, &u_zoom);
+        glfwSetScrollCallback(window, [](GLFWwindow* window, [[maybe_unused]] double xoffset, double yoffset) {
+            auto u_zoom = static_cast<float*>(glfwGetWindowUserPointer(window));
+            *u_zoom += yoffset / 100;
+        });
+
+        // TODO: font rendering using freetype
 
         while (!glfwWindowShouldClose(window)) {
 
+            u_zoom = std::clamp(u_zoom, 0.0f, 1.0f);
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glm::mat4 mat(1.0f);
-            mat = glm::rotate(
-                mat,
+            glm::mat4 u_mat(1.0f);
+            u_mat = glm::rotate(
+                u_mat,
                 static_cast<float>(glfwGetTime()) * glm::radians(180.0f),
                 glm::vec3(0.5f, 1.0f, 0.0f)
             );
-            shader.set_uniform_mat4("u_mat", mat);
+            shader.set_uniform_mat4("u_mat", u_mat);
+            shader.set_uniform_float("u_zoom", u_zoom);
 
-            texture.bind();
+            // texture.bind();
             shader.use();
             va.bind();
             glDrawArrays(GL_TRIANGLES, 0, vertices.size());
