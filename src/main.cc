@@ -1,5 +1,6 @@
 #include <print>
 #include <vector>
+#include <regex>
 #include <array>
 #include <ranges>
 #include <cassert>
@@ -89,59 +90,59 @@ static std::vector<Vertex> parse_obj(const char *filename) {
 
     std::string line;
     while (std::getline(stream, line)) {
+        const std::string re_comment(R"(\s*\#.*$)");
 
-        std::vector<std::string> elems;
+        const std::string re_float(R"([+-]?[0-9]*\.?[0-9]*)");
+        std::smatch matches;
+        int matchcount = 0;
 
-        std::istringstream linestream(line);
-        std::string elem;
-        while (std::getline(linestream, elem, ' ')) {
-            elems.push_back(elem);
-        }
-
-        if (!elems[0].compare("v")) {
-            float x = std::stof(elems[1]);
-            float y = std::stof(elems[2]);
-            float z = std::stof(elems[3]);
+        std::regex re_vertex(std::format(R"(v\s*({0})\s*({0})\s*({0}){1})", re_float, re_comment));
+        if (std::regex_match(line, matches, re_vertex)) {
+            float x = std::stof(matches.str(1));
+            float y = std::stof(matches.str(2));
+            float z = std::stof(matches.str(3));
             tmp_vertices.push_back({ x, y, z });
+            matchcount++;
         }
 
-        if (!elems[0].compare("vt")) {
-            float u = std::stof(elems[1]);
-            float v = std::stof(elems[2]);
+        std::regex re_tex(std::format(R"(vt\s*({0})\s*({0}){1})", re_float, re_comment));
+        if (std::regex_match(line, matches, re_tex)) {
+            float u = std::stof(matches.str(1));
+            float v = std::stof(matches.str(2));
             tmp_uv.push_back({ u, v });
+            matchcount++;
         }
 
-        if (!elems[0].compare("vn")) {
-            float x = std::stof(elems[1]);
-            float y = std::stof(elems[2]);
-            float z = std::stof(elems[3]);
+        std::regex re_norm(std::format(R"(vn\s*({0})\s*({0})\s*({0}){1})", re_float, re_comment));
+        if (std::regex_match(line, matches, re_norm)) {
+            float x = std::stof(matches.str(1));
+            float y = std::stof(matches.str(2));
+            float z = std::stof(matches.str(3));
             tmp_normal.push_back({ x, y, z });
+            matchcount++;
         }
 
-        if (!elems[0].compare("f")) {
-            unsigned int vertex[3], tex[3], norm[3];
-            sscanf(elems[1].c_str(), "%d/%d/%d", vertex, tex, norm);
-            sscanf(elems[2].c_str(), "%d/%d/%d", vertex+1, tex+1, norm+1);
-            sscanf(elems[3].c_str(), "%d/%d/%d", vertex+2, tex+2, norm+2);
-            vertex_idx.push_back(vertex[0]);
-            vertex_idx.push_back(vertex[1]);
-            vertex_idx.push_back(vertex[2]);
-            uv_idx.push_back(tex[0]);
-            uv_idx.push_back(tex[1]);
-            uv_idx.push_back(tex[2]);
-            norm_idx.push_back(norm[0]);
-            norm_idx.push_back(norm[1]);
-            norm_idx.push_back(norm[2]);
+        const std::string re_num(R"([0-9]+)");
+        const std::string re_idx(std::format(R"(({0})/({0})/({0}))", re_num));
+        std::regex re_face(std::format(R"(f\s*{0}\s*{0}\s*{0}{1})", re_idx, re_comment));
+        if (std::regex_match(line, matches, re_face)) {
+            vertex_idx.push_back(std::stoi(matches.str(1)));
+            uv_idx    .push_back(std::stoi(matches.str(2)));
+            norm_idx  .push_back(std::stoi(matches.str(3)));
+            vertex_idx.push_back(std::stoi(matches.str(4)));
+            uv_idx    .push_back(std::stoi(matches.str(5)));
+            norm_idx  .push_back(std::stoi(matches.str(6)));
+            vertex_idx.push_back(std::stoi(matches.str(7)));
+            uv_idx    .push_back(std::stoi(matches.str(8)));
+            norm_idx  .push_back(std::stoi(matches.str(9)));
+            matchcount++;
         }
+
+        assert(matchcount <= 1);
 
     }
 
     std::vector<Vertex> verts;
-
-    // for (auto &idx : vertex_idx) {
-    //     auto vert = tmp_vertices[idx-1];
-    //     verts.push_back(Vertex(vert));
-    // }
 
     assert(vertex_idx.size() == uv_idx.size());
     assert(vertex_idx.size() == norm_idx.size());
@@ -163,7 +164,7 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
-    auto vertices = parse_obj("model2.obj");
+    auto vertices = parse_obj("model.obj");
     for (auto &v : vertices) {
         std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
     }
