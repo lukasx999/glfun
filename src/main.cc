@@ -74,7 +74,8 @@ static void process_inputs(GLFWwindow *window) {
         glfwSetWindowShouldClose(window, 1);
 }
 
-static std::vector<Vertex> parse_obj(const char *filename) {
+
+[[nodiscard]] static std::vector<Vertex> parse_obj(const char *filename) {
     std::ifstream file(filename);
     std::string obj(
         (std::istreambuf_iterator<char>(file)),
@@ -143,8 +144,9 @@ static std::vector<Vertex> parse_obj(const char *filename) {
     }
 
     return verts;
-
 }
+
+
 
 int main() {
 
@@ -155,9 +157,10 @@ int main() {
     // };
 
     auto vertices = parse_obj("model.obj");
-    for (auto &v : vertices) {
-        std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
-    }
+
+    // for (auto &v : vertices) {
+    //     std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
+    // }
 
     GLFWwindow *window = setup_glfw();
     {
@@ -175,7 +178,6 @@ int main() {
         VertexArray va;
         VertexBuffer vb(vertices);
 
-        // Texture texture(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB);
         Texture texture(GL_TEXTURE0, "./texture.png", false, GL_RGBA);
 
         GLuint pos = shader.get_attrib_loc("a_pos");
