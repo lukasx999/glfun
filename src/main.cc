@@ -167,7 +167,7 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
-    auto vertices = parse_obj("assets/teapot.obj");
+    auto vertices = parse_obj("assets/cow.obj");
 
     // for (auto &v : vertices) {
     //     std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
@@ -199,7 +199,7 @@ int main() {
           .push_attr(uv,  2, GL_FLOAT)
           .push_attr(col, 3, GL_FLOAT);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
         float u_zoom = 1;
 
