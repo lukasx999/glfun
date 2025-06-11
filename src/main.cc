@@ -138,10 +138,14 @@ static std::vector<Vertex> parse_obj(const char *filename) {
 
     std::vector<Vertex> verts;
 
-    for (auto &idx : vertex_idx) {
-        auto vert = tmp_vertices[idx-1];
-        verts.push_back(Vertex(vert));
-    }
+    // for (auto &idx : vertex_idx) {
+    //     auto vert = tmp_vertices[idx-1];
+    //     verts.push_back(Vertex(vert));
+    // }
+
+    assert(vertex_idx.size() == uv_idx.size());
+    assert(vertex_idx.size() == norm_idx.size());
+    assert(uv_idx.size() == norm_idx.size());
 
     for (auto &&[vert, uv, norm] : std::views::zip(vertex_idx, uv_idx, norm_idx)) {
         verts.push_back(Vertex(tmp_vertices[vert-1], tmp_uv[uv-1]));
@@ -159,7 +163,7 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
-    auto vertices = parse_obj("model.obj");
+    auto vertices = parse_obj("model2.obj");
     for (auto &v : vertices) {
         std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
     }
@@ -181,7 +185,7 @@ int main() {
         VertexBuffer vb(vertices);
 
         // Texture texture(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB);
-        Texture texture(GL_TEXTURE1, "./assets/c++.png", true,  GL_RGBA, 0, 0);
+        Texture texture(GL_TEXTURE0, "./texture.png", false, GL_RGBA);
 
         GLuint pos = shader.get_attrib_loc("a_pos");
         GLuint uv  = shader.get_attrib_loc("a_uv");
