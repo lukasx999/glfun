@@ -1,4 +1,5 @@
 #include <print>
+#include <vector>
 #include <array>
 #include <cassert>
 #include <span>
@@ -71,59 +72,81 @@ static void process_inputs(GLFWwindow *window) {
         glfwSetWindowShouldClose(window, 1);
 }
 
+static std::vector<Vertex> parse_obj(const char *filename) {
+    std::ifstream file(filename);
+    std::string obj(
+        (std::istreambuf_iterator<char>(file)),
+        (std::istreambuf_iterator<char>())
+    );
+
+    std::vector<glm::vec3> tmp_vertices;
+    std::vector<glm::vec2> tmp_uv;
+    std::vector<glm::vec3> tmp_normal;
+
+    std::istringstream stream(obj);
+
+    std::string line;
+    while (std::getline(stream, line)) {
+
+        std::vector<std::string> elems;
+
+        std::istringstream linestream(line);
+        std::string elem;
+        while (std::getline(linestream, elem, ' ')) {
+            elems.push_back(elem);
+        }
+
+        if (!elems[0].compare("v")) {
+            float x = std::stof(elems[1]);
+            float y = std::stof(elems[2]);
+            float z = std::stof(elems[3]);
+            tmp_vertices.push_back({ x, y, z });
+        }
+
+        if (!elems[0].compare("vt")) {
+            float u = std::stof(elems[1]);
+            float v = std::stof(elems[2]);
+            tmp_uv.push_back({ u, v });
+        }
+
+        if (!elems[0].compare("vn")) {
+            float x = std::stof(elems[1]);
+            float y = std::stof(elems[2]);
+            float z = std::stof(elems[3]);
+            tmp_normal.push_back({ x, y, z });
+        }
+
+        if (!elems[0].compare("f")) {
+            float x = std::stof(elems[1]);
+            float y = std::stof(elems[2]);
+            float z = std::stof(elems[3]);
+            tmp_normal.push_back({ x, y, z });
+        }
+
+    }
+
+    std::vector<Vertex> verts;
+
+    for (auto &v : tmp_vertices) {
+        verts.push_back(Vertex(v));
+    }
+
+    return verts;
+
+}
+
 int main() {
 
-    std::array vertices {
-        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f }),
-        Vertex({  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f }),
-        Vertex({  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f }),
-        Vertex({  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f }),
-        Vertex({ -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f }),
+    // std::array vertices {
+    //     Vertex({ -0.5f, -0.5f, 0.0f }),
+    //     Vertex({  0.5f, -0.5f, 0.0f }),
+    //     Vertex({  0.0f,  0.5f, 0.0f })
+    // };
 
-        Vertex({ -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f }),
-        Vertex({  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f }),
-        Vertex({ -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f }),
-
-        Vertex({ -0.5f,  0.5f,  0.5f }, { 1.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f,  0.5f }, { 1.0f, 0.0f }),
-
-        Vertex({ 0.5f,  0.5f,  0.5f }, {1.0f, 0.0f }),
-        Vertex({ 0.5f,  0.5f, -0.5f }, {1.0f, 1.0f }),
-        Vertex({ 0.5f, -0.5f, -0.5f }, {0.0f, 1.0f }),
-        Vertex({ 0.5f, -0.5f, -0.5f }, {0.0f, 1.0f }),
-        Vertex({ 0.5f, -0.5f,  0.5f }, {0.0f, 0.0f }),
-        Vertex({ 0.5f,  0.5f,  0.5f }, {1.0f, 0.0f }),
-
-        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f }),
-        Vertex({  0.5f, -0.5f, -0.5f }, { 1.0f, 1.0f }),
-        Vertex({  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f }),
-        Vertex({  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f }),
-        Vertex({ -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f }),
-        Vertex({ -0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f }),
-
-        Vertex({ -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f }),
-        Vertex({  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f }, { 1.0f, 0.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f }, { 1.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f,  0.5f }, { 0.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f }),
-    };
-
-
-
-    // TODO:
-    // std::ifstream file("model.obj");
-    // std::string obj((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
-
-
+    auto vertices = parse_obj("model.obj");
+    for (auto &v : vertices) {
+        std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
+    }
 
     GLFWwindow *window = setup_glfw();
     {
@@ -135,13 +158,7 @@ int main() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        Texture tex_container(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB, 0, 0);
-        Texture tex_cpp(GL_TEXTURE1, "./assets/c++.png", true,  GL_RGBA, 0, 0);
-
-        shader
-            .use()
-            .set_uniform_int("tex_container", 0)
-            .set_uniform_int("tex_cpp", 1);
+        shader.use();
 
         VertexArray va;
         VertexBuffer vb(vertices);
@@ -164,8 +181,6 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            tex_container.bind();
-            tex_cpp.bind();
             shader.use();
             va.bind();
             glDrawArrays(GL_TRIANGLES, 0, vertices.size());

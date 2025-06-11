@@ -28,6 +28,12 @@ Vertex::Vertex(glm::vec3 pos, glm::vec2 uv)
     , m_color(color_to_vec3(Color::BLACK))
 { }
 
+Vertex::Vertex(glm::vec3 pos)
+    : m_pos(pos)
+    , m_uv(glm::vec3(0))
+    , m_color(color_to_vec3(Color::BLACK))
+{ }
+
 Vertex &Vertex::rotate(float angle, glm::vec3 normal) {
     m_pos = glm::rotate(m_pos, angle, normal);
     return *this;

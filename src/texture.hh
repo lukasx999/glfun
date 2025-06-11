@@ -21,6 +21,7 @@ class Texture {
     GLenum m_unit;
 
 public:
+    // unit is GL_TEXTURE0 for example
     Texture(GLenum unit, const char *filename, bool flip_vert, int format);
     Texture(GLenum unit, const char *filename, bool flip_vert, int format, int resize_width, int resize_height);
     Texture &bind();

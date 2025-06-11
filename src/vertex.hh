@@ -34,6 +34,7 @@ struct Vertex {
 
     Vertex(glm::vec3 pos, glm::vec2 uv, Color color);
     Vertex(glm::vec3 pos, glm::vec2 uv);
+    Vertex(glm::vec3 pos);
     Vertex &rotate(float angle, glm::vec3 normal);
 
 };
