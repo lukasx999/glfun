@@ -90,55 +90,45 @@ static std::vector<Vertex> parse_obj(const char *filename) {
 
     std::string line;
     while (std::getline(stream, line)) {
-        const std::string re_comment(R"(\s*\#.*$)");
 
-        const std::string re_float(R"([+-]?[0-9]*\.?[0-9]*)");
         std::smatch matches;
-        int matchcount = 0;
-
-        std::regex re_vertex(std::format(R"(v\s*({0})\s*({0})\s*({0}){1})", re_float, re_comment));
-        if (std::regex_match(line, matches, re_vertex)) {
-            float x = std::stof(matches.str(1));
-            float y = std::stof(matches.str(2));
-            float z = std::stof(matches.str(3));
-            tmp_vertices.push_back({ x, y, z });
-            matchcount++;
-        }
-
-        std::regex re_tex(std::format(R"(vt\s*({0})\s*({0}){1})", re_float, re_comment));
-        if (std::regex_match(line, matches, re_tex)) {
-            float u = std::stof(matches.str(1));
-            float v = std::stof(matches.str(2));
-            tmp_uv.push_back({ u, v });
-            matchcount++;
-        }
-
-        std::regex re_norm(std::format(R"(vn\s*({0})\s*({0})\s*({0}){1})", re_float, re_comment));
-        if (std::regex_match(line, matches, re_norm)) {
-            float x = std::stof(matches.str(1));
-            float y = std::stof(matches.str(2));
-            float z = std::stof(matches.str(3));
-            tmp_normal.push_back({ x, y, z });
-            matchcount++;
-        }
-
         const std::string re_num(R"([0-9]+)");
         const std::string re_idx(std::format(R"(({0})/({0})/({0}))", re_num));
-        std::regex re_face(std::format(R"(f\s*{0}\s*{0}\s*{0}{1})", re_idx, re_comment));
-        if (std::regex_match(line, matches, re_face)) {
-            vertex_idx.push_back(std::stoi(matches.str(1)));
-            uv_idx    .push_back(std::stoi(matches.str(2)));
-            norm_idx  .push_back(std::stoi(matches.str(3)));
-            vertex_idx.push_back(std::stoi(matches.str(4)));
-            uv_idx    .push_back(std::stoi(matches.str(5)));
-            norm_idx  .push_back(std::stoi(matches.str(6)));
-            vertex_idx.push_back(std::stoi(matches.str(7)));
-            uv_idx    .push_back(std::stoi(matches.str(8)));
-            norm_idx  .push_back(std::stoi(matches.str(9)));
-            matchcount++;
-        }
+        const std::string re_comment(R"(\s*#?.*$)");
+        const std::string re_float(R"([+-]?[0-9]*\.?[0-9]*)");
+        const std::regex re_vertex(std::format(R"(v\s+({0})\s+({0})\s+({0}){1})", re_float, re_comment));
+        const std::regex re_tex(std::format(R"(vt\s+({0})\s+({0}){1})", re_float, re_comment));
+        const std::regex re_norm(std::format(R"(vn\s+({0})\s+({0})\s+({0}){1})", re_float, re_comment));
+        const std::regex re_face(std::format(R"(f\s+{0}\s+{0}\s+{0}{1})", re_idx, re_comment));
 
-        assert(matchcount <= 1);
+        if (std::regex_match(line, matches, re_vertex)) {
+            float x = stof(matches.str(1));
+            float y = stof(matches.str(2));
+            float z = stof(matches.str(3));
+            tmp_vertices.push_back({ x, y, z });
+
+        } else if (std::regex_match(line, matches, re_tex)) {
+            float u = stof(matches.str(1));
+            float v = stof(matches.str(2));
+            tmp_uv.push_back({ u, v });
+
+        } else if (std::regex_match(line, matches, re_norm)) {
+            float x = stof(matches.str(1));
+            float y = stof(matches.str(2));
+            float z = stof(matches.str(3));
+            tmp_normal.push_back({ x, y, z });
+
+        } else if (std::regex_match(line, matches, re_face)) {
+            vertex_idx.push_back(stoi(matches.str(1)));
+            uv_idx    .push_back(stoi(matches.str(2)));
+            norm_idx  .push_back(stoi(matches.str(3)));
+            vertex_idx.push_back(stoi(matches.str(4)));
+            uv_idx    .push_back(stoi(matches.str(5)));
+            norm_idx  .push_back(stoi(matches.str(6)));
+            vertex_idx.push_back(stoi(matches.str(7)));
+            uv_idx    .push_back(stoi(matches.str(8)));
+            norm_idx  .push_back(stoi(matches.str(9)));
+        }
 
     }
 
