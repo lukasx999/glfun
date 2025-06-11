@@ -180,7 +180,8 @@ int main() {
         VertexArray va;
         VertexBuffer vb(vertices);
 
-        Texture texture(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB);
+        // Texture texture(GL_TEXTURE0, "./assets/container.jpg", false, GL_RGB);
+        Texture texture(GL_TEXTURE1, "./assets/c++.png", true,  GL_RGBA, 0, 0);
 
         GLuint pos = shader.get_attrib_loc("a_pos");
         GLuint uv  = shader.get_attrib_loc("a_uv");
