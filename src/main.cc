@@ -82,6 +82,7 @@ static std::vector<Vertex> parse_obj(const char *filename) {
     std::vector<glm::vec3> tmp_vertices;
     std::vector<glm::vec2> tmp_uv;
     std::vector<glm::vec3> tmp_normal;
+    std::vector<unsigned int> vertex_idx, uv_idx, norm_idx;
 
     std::istringstream stream(obj);
 
@@ -117,18 +118,28 @@ static std::vector<Vertex> parse_obj(const char *filename) {
         }
 
         if (!elems[0].compare("f")) {
-            float x = std::stof(elems[1]);
-            float y = std::stof(elems[2]);
-            float z = std::stof(elems[3]);
-            tmp_normal.push_back({ x, y, z });
+            unsigned int vertex[3], tex[3], norm[3];
+            sscanf(elems[1].c_str(), "%d/%d/%d", vertex, tex, norm);
+            sscanf(elems[2].c_str(), "%d/%d/%d", vertex+1, tex+1, norm+1);
+            sscanf(elems[3].c_str(), "%d/%d/%d", vertex+2, tex+2, norm+2);
+            vertex_idx.push_back(vertex[0]);
+            vertex_idx.push_back(vertex[1]);
+            vertex_idx.push_back(vertex[2]);
+            uv_idx.push_back(tex[0]);
+            uv_idx.push_back(tex[1]);
+            uv_idx.push_back(tex[2]);
+            norm_idx.push_back(norm[0]);
+            norm_idx.push_back(norm[1]);
+            norm_idx.push_back(norm[2]);
         }
 
     }
 
     std::vector<Vertex> verts;
 
-    for (auto &v : tmp_vertices) {
-        verts.push_back(Vertex(v));
+    for (auto &idx : vertex_idx) {
+        auto vert = tmp_vertices[idx-1];
+        verts.push_back(Vertex(vert));
     }
 
     return verts;
@@ -162,6 +173,7 @@ int main() {
 
         VertexArray va;
         VertexBuffer vb(vertices);
+        // IndexBuffer ib;
 
         GLuint pos = shader.get_attrib_loc("a_pos");
         GLuint tex = shader.get_attrib_loc("a_tex_coords");
@@ -172,10 +184,8 @@ int main() {
             .push_attr(tex, 2, GL_FLOAT)
             .push_attr(col, 3, GL_FLOAT);
 
-
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
-
 
         while (!glfwWindowShouldClose(window)) {
 
