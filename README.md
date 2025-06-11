@@ -1,2 +1,1 @@
-# glcube
-cube in opengl
+# OpenGL playground
