@@ -24,8 +24,8 @@
 #include "glad/gl.h"
 
 
-constexpr int WIDTH  = 1600;
-constexpr int HEIGHT = 900;
+static constexpr int WIDTH  = 1600;
+static constexpr int HEIGHT = 900;
 
 [[nodiscard]] static GLFWwindow *setup_glfw() {
 
