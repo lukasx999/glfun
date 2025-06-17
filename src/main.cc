@@ -195,9 +195,9 @@ int main() {
         GLuint uv  = shader.get_attrib_loc("a_uv");
         GLuint col = shader.get_attrib_loc("a_col");
 
-        va.push_attr(pos, 3, GL_FLOAT)
-          .push_attr(uv,  2, GL_FLOAT)
-          .push_attr(col, 3, GL_FLOAT);
+        va.push<float>(pos, 3)
+          .push<float>(uv,  2)
+          .push<float>(col, 3);
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);

@@ -1,6 +1,5 @@
 #include "vertexarray.hh"
 #include "vertex.hh"
-#include <utility>
 
 
 
@@ -10,21 +9,6 @@ VertexArray::VertexArray() : m_offset(0) {
 
 VertexArray::~VertexArray() {
     glDeleteVertexArrays(1, &m_id);
-}
-
-VertexArray &VertexArray::push_attr(GLuint loc, GLint size, GLenum type) {
-    bind();
-    glVertexAttribPointer(
-        loc,
-        size,
-        type,
-        false,
-        sizeof(Vertex),
-        reinterpret_cast<void*>(m_offset)
-    );
-    glEnableVertexAttribArray(loc);
-    m_offset += sizeof_gltype(type) * size;
-    return *this;
 }
 
 VertexArray &VertexArray::bind() {
@@ -37,10 +21,24 @@ VertexArray &VertexArray::unbind() {
     return *this;
 }
 
-[[nodiscard]] constexpr size_t VertexArray::sizeof_gltype(GLenum type) const {
-    switch (type) {
-        case GL_FLOAT: return sizeof(float);
-        default: assert(!"unknown type");
-    };
-    std::unreachable();
+template<>
+VertexArray &VertexArray::push<float>(GLuint location, GLint components) {
+    push_attr(location, components, GL_FLOAT, sizeof(float));
+    return *this;
+}
+
+void VertexArray::push_attr(GLuint location, GLint components, GLenum type, size_t elem_size) {
+    bind();
+
+    glVertexAttribPointer(
+        location,
+        components,
+        type,
+        false,
+        sizeof(Vertex),
+        reinterpret_cast<void*>(m_offset)
+    );
+
+    glEnableVertexAttribArray(location);
+    m_offset += elem_size * components;
 }

@@ -20,12 +20,19 @@ class VertexArray {
 public:
     VertexArray();
     ~VertexArray();
-
-    VertexArray &push_attr(GLuint loc, GLint size, GLenum type);
     VertexArray &bind();
     VertexArray &unbind();
 
+    template <typename T>
+    VertexArray &push([[maybe_unused]] GLuint location, [[maybe_unused]] GLint components) {
+        static_assert(false);
+        return *this;
+    }
+
 private:
-    [[nodiscard]] constexpr size_t sizeof_gltype(GLenum type) const;
+    void push_attr(GLuint location, GLint components, GLenum type, size_t elem_size);
 
 };
+
+template<>
+VertexArray &VertexArray::push<float>(GLuint location, GLint components);
