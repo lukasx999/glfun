@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <span>
-
 #include "glad/gl.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -24,15 +21,15 @@ public:
     VertexArray &unbind();
 
     template <typename T>
-    VertexArray &push([[maybe_unused]] GLuint location, [[maybe_unused]] GLint components) {
+    VertexArray &add([[maybe_unused]] GLuint location, [[maybe_unused]] GLint components) {
         static_assert(false);
         return *this;
     }
 
 private:
-    void push_attr(GLuint location, GLint components, GLenum type, size_t elem_size);
+    void add_attr(GLuint location, GLint components, GLenum type, size_t elem_size);
 
 };
 
 template<>
-VertexArray &VertexArray::push<float>(GLuint location, GLint components);
+VertexArray &VertexArray::add<float>(GLuint location, GLint components);

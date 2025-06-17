@@ -27,6 +27,12 @@
 static constexpr int WIDTH  = 1600;
 static constexpr int HEIGHT = 900;
 
+struct State {
+    float u_zoom = 0.1;
+    glm::mat4 u_mat { 1.0f };
+    bool polygon_mode = false;
+};
+
 [[nodiscard]] static GLFWwindow *setup_glfw() {
 
     glfwSetErrorCallback([]([[maybe_unused]] int error_code, const char* description) {
@@ -63,16 +69,28 @@ static constexpr int HEIGHT = 900;
     return ret;
 }
 
-static void process_inputs(GLFWwindow *window) {
-    static bool mode = false;
+static void process_inputs(GLFWwindow *window, State &state) {
 
     if (is_key_rising(window, GLFW_KEY_K))
-        mode = !mode;
+        state.polygon_mode = !state.polygon_mode;
 
-    glPolygonMode(GL_FRONT_AND_BACK, mode ? GL_LINE : GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, state.polygon_mode ? GL_LINE : GL_FILL);
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
+
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        state.u_mat = glm::rotate(state.u_mat, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        state.u_mat = glm::rotate(state.u_mat, -glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        state.u_mat = glm::rotate(state.u_mat, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        state.u_mat = glm::rotate(state.u_mat, -glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
 }
 
 
@@ -167,7 +185,7 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
-    auto vertices = parse_obj("assets/cow.obj");
+    auto vertices = parse_obj("./assets/teapot.obj");
 
     // for (auto &v : vertices) {
     //     std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
@@ -195,43 +213,38 @@ int main() {
         GLuint uv  = shader.get_attrib_loc("a_uv");
         GLuint col = shader.get_attrib_loc("a_col");
 
-        va.push<float>(pos, 3)
-          .push<float>(uv,  2)
-          .push<float>(col, 3);
+        va.add<float>(pos, 3)
+          .add<float>(uv,  2)
+          .add<float>(col, 3);
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
-        float u_zoom = 1;
 
-        glfwSetWindowUserPointer(window, &u_zoom);
+        State state;
+
+        glfwSetWindowUserPointer(window, &state);
         glfwSetScrollCallback(window, [](GLFWwindow* window, [[maybe_unused]] double xoffset, double yoffset) {
-            auto u_zoom = static_cast<float*>(glfwGetWindowUserPointer(window));
-            *u_zoom += yoffset / 100;
+            auto state = static_cast<State*>(glfwGetWindowUserPointer(window));
+            state->u_zoom += yoffset / 100;
         });
 
         // TODO: font rendering using freetype
 
         while (!glfwWindowShouldClose(window)) {
 
-            u_zoom = std::clamp(u_zoom, 0.0f, 1.0f);
+            state.u_zoom = std::clamp(state.u_zoom, 0.0f, 1.0f);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glm::mat4 u_mat(1.0f);
-            u_mat = glm::rotate(
-                u_mat,
-                static_cast<float>(glfwGetTime()) * glm::radians(180.0f),
-                glm::vec3(0.5f, 1.0f, 0.0f)
-            );
-            shader.set_uniform("u_mat", u_mat);
-            shader.set_uniform("u_zoom", u_zoom);
+            shader.set_uniform("u_mat", state.u_mat);
+            shader.set_uniform("u_zoom", state.u_zoom);
 
             // texture.bind();
             shader.use();
             va.bind();
             glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
-            process_inputs(window);
+            process_inputs(window, state);
             glfwSwapBuffers(window);
             glfwPollEvents();
         }

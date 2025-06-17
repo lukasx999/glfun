@@ -22,12 +22,12 @@ VertexArray &VertexArray::unbind() {
 }
 
 template<>
-VertexArray &VertexArray::push<float>(GLuint location, GLint components) {
-    push_attr(location, components, GL_FLOAT, sizeof(float));
+VertexArray &VertexArray::add<float>(GLuint location, GLint components) {
+    add_attr(location, components, GL_FLOAT, sizeof(float));
     return *this;
 }
 
-void VertexArray::push_attr(GLuint location, GLint components, GLenum type, size_t elem_size) {
+void VertexArray::add_attr(GLuint location, GLint components, GLenum type, size_t elem_size) {
     bind();
 
     glVertexAttribPointer(
