@@ -184,7 +184,7 @@ int main() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         shader.use()
-              .set_uniform_int("tex", 0);
+              .set_uniform("tex", 0);
 
         VertexArray va;
         VertexBuffer vb(vertices);
@@ -223,8 +223,8 @@ int main() {
                 static_cast<float>(glfwGetTime()) * glm::radians(180.0f),
                 glm::vec3(0.5f, 1.0f, 0.0f)
             );
-            shader.set_uniform_mat4("u_mat", u_mat);
-            shader.set_uniform_float("u_zoom", u_zoom);
+            shader.set_uniform("u_mat", u_mat);
+            shader.set_uniform("u_zoom", u_zoom);
 
             // texture.bind();
             shader.use();

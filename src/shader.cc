@@ -27,22 +27,22 @@ Shader::~Shader() {
     glDeleteProgram(m_id);
 }
 
-Shader &Shader::set_uniform_int(const char *name, int value) {
+Shader &Shader::set_uniform(const char *name, int value) {
     glUniform1i(glGetUniformLocation(m_id, name), value);
     return *this;
 }
 
-Shader &Shader::set_uniform_float(const char *name, float value) {
+Shader &Shader::set_uniform(const char *name, float value) {
     glUniform1f(glGetUniformLocation(m_id, name), value);
     return *this;
 }
 
-Shader &Shader::set_uniform_3f(const char *name, glm::vec3 value) {
+Shader &Shader::set_uniform(const char *name, glm::vec3 value) {
     glUniform3f(glGetUniformLocation(m_id, name), value.x, value.y, value.z);
     return *this;
 }
 
-Shader &Shader::set_uniform_mat4(const char *name, glm::mat4 value) {
+Shader &Shader::set_uniform(const char *name, glm::mat4 value) {
     glUniformMatrix4fv(glGetUniformLocation(m_id, name), 1, false, glm::value_ptr(value));
     return *this;
 }

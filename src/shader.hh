@@ -1,6 +1,5 @@
 #pragma once
 
-#include <filesystem>
 #include <string>
 
 #include "glad/gl.h"
@@ -23,10 +22,10 @@ public:
     Shader &use();
     [[nodiscard]] GLuint get_attrib_loc(const char *name) const;
     // make sure to use() before setting uniforms
-    Shader &set_uniform_int(const char *name, int value);
-    Shader &set_uniform_float(const char *name, float value);
-    Shader &set_uniform_3f(const char *name, glm::vec3 value);
-    Shader &set_uniform_mat4(const char *name, glm::mat4 value);
+    Shader &set_uniform(const char *name, int value);
+    Shader &set_uniform(const char *name, float value);
+    Shader &set_uniform(const char *name, glm::vec3 value);
+    Shader &set_uniform(const char *name, glm::mat4 value);
 
 private:
     [[nodiscard]] std::string read_entire_file(const char *filename) const;
