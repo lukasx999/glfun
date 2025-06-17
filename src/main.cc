@@ -184,6 +184,8 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
+    State state;
+
     auto vertices = parse_obj("./assets/teapot.obj");
 
     // for (auto &v : vertices) {
@@ -192,8 +194,6 @@ int main() {
 
     GLFWwindow *window = setup_glfw();
     {
-
-        State state;
 
         glDebugMessageCallback([](
             [[maybe_unused]] GLenum src,
