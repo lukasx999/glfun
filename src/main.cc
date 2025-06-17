@@ -4,6 +4,7 @@
 #include <array>
 #include <ranges>
 #include <cassert>
+#include <memory>
 #include <span>
 #include <fstream>
 
@@ -36,12 +37,12 @@ struct State {
 [[nodiscard]] static GLFWwindow *setup_glfw() {
 
     glfwSetErrorCallback([]([[maybe_unused]] int error_code, const char* description) {
-        std::println(stderr, "GLFW ERROR: {}", description);
+        std::println(stderr, "GLFW Error: {}", description);
     });
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Cube", nullptr, nullptr);
@@ -175,8 +176,6 @@ static void process_inputs(GLFWwindow *window, State &state) {
     return verts;
 }
 
-
-
 int main() {
 
     // std::array vertices {
@@ -194,12 +193,25 @@ int main() {
     GLFWwindow *window = setup_glfw();
     {
 
+        State state;
+
+        glDebugMessageCallback([](
+            [[maybe_unused]] GLenum src,
+            [[maybe_unused]] GLenum type,
+            [[maybe_unused]] GLuint id,
+            [[maybe_unused]] GLenum severity,
+            [[maybe_unused]] GLsizei len,
+            const char *msg,
+            [[maybe_unused]] const void *args
+        ) { std::println(stderr, "OpenGL Error: {}", msg); }, nullptr);
+
         Shader shader("vert.glsl", "frag.glsl");
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
         shader.use()
               .set_uniform("tex", 0);
@@ -219,8 +231,6 @@ int main() {
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
-
-        State state;
 
         glfwSetWindowUserPointer(window, &state);
         glfwSetScrollCallback(window, [](GLFWwindow* window, [[maybe_unused]] double xoffset, double yoffset) {
