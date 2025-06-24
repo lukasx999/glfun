@@ -55,8 +55,7 @@ struct State {
     gladLoadGL(glfwGetProcAddress);
 
     glfwSetFramebufferSizeCallback(
-        window,
-        []([[maybe_unused]] GLFWwindow *win, int w, int h) {
+        window, []([[maybe_unused]] GLFWwindow *win, int w, int h) {
             glViewport(0, 0, w, h);
         }
     );
@@ -236,20 +235,23 @@ int main() {
 
         glfwSetWindowUserPointer(window, &state);
         glfwSetScrollCallback(window, [](GLFWwindow* window, [[maybe_unused]] double xoffset, double yoffset) {
-            auto state = static_cast<State*>(glfwGetWindowUserPointer(window));
-            state->u_zoom += yoffset / 100;
+            auto &state = *static_cast<State*>(glfwGetWindowUserPointer(window));
+            state.u_zoom += yoffset / 100;
         });
-
-        // TODO: font rendering using freetype
 
         while (!glfwWindowShouldClose(window)) {
 
             state.u_zoom = std::clamp(state.u_zoom, 0.0f, 1.0f);
 
+            glm::mat4 u_transform(1.0f);
+            float x = glfwGetTime() * 45.0f;
+            u_transform = glm::rotate(u_transform, glm::radians(x), glm::vec3(0.0f, 1.0f, 0.0f));
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             shader.set_uniform("u_mat", state.u_mat);
             shader.set_uniform("u_zoom", state.u_zoom);
+            shader.set_uniform("u_transform", u_transform);
 
             // texture.bind();
             shader.use();
