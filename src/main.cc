@@ -25,6 +25,10 @@
 #include "glad/gl.h"
 
 
+#define PRINT(x) std::println("{}: {}", #x, x)
+
+
+
 static constexpr int WIDTH  = 1600;
 static constexpr int HEIGHT = 900;
 
@@ -60,9 +64,9 @@ struct State {
     return window;
 }
 
-// TODO: not working correctly -> investigate
-[[nodiscard]] static bool is_key_rising(GLFWwindow *window, int key) {
+using GLFWKey = int;
 
+[[nodiscard]] static bool is_key_rising(GLFWwindow *window, GLFWKey key) {
     static bool old = false;
     bool pressed = glfwGetKey(window, key) == GLFW_PRESS;
     bool ret = !old && pressed;
@@ -70,26 +74,31 @@ struct State {
     return ret;
 }
 
+[[nodiscard]] static bool is_key_down(GLFWwindow *window, GLFWKey key) {
+    return glfwGetKey(window, key) == GLFW_PRESS;
+}
+
 static void process_inputs(GLFWwindow *window, State &state) {
 
-    if (is_key_rising(window, GLFW_KEY_K))
+    if (is_key_rising(window, GLFW_KEY_K)) {
         state.polygon_mode = !state.polygon_mode;
+    }
 
     glPolygonMode(GL_FRONT_AND_BACK, state.polygon_mode ? GL_LINE : GL_FILL);
 
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (is_key_down(window, GLFW_KEY_ESCAPE))
         glfwSetWindowShouldClose(window, 1);
 
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    if (is_key_down(window, GLFW_KEY_RIGHT))
         state.u_mat = glm::rotate(state.u_mat, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    if (is_key_down(window, GLFW_KEY_LEFT))
         state.u_mat = glm::rotate(state.u_mat, -glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if (is_key_down(window, GLFW_KEY_UP))
         state.u_mat = glm::rotate(state.u_mat, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if (is_key_down(window, GLFW_KEY_DOWN))
         state.u_mat = glm::rotate(state.u_mat, -glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 }
@@ -97,10 +106,7 @@ static void process_inputs(GLFWwindow *window, State &state) {
 
 [[nodiscard]] static std::vector<Vertex> parse_obj(const char *filename) {
     std::ifstream file(filename);
-    std::string obj(
-        (std::istreambuf_iterator<char>(file)),
-        (std::istreambuf_iterator<char>())
-    );
+    std::string obj((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 
     std::vector<glm::vec3> tmp_vertices;
     std::vector<glm::vec2> tmp_uv;
@@ -160,10 +166,6 @@ static void process_inputs(GLFWwindow *window, State &state) {
     }
 
     std::vector<Vertex> verts;
-
-    // assert(vertex_idx.size() == uv_idx.size());
-    // assert(vertex_idx.size() == norm_idx.size());
-    // assert(uv_idx.size() == norm_idx.size());
 
     // for (auto &&[vert, uv, norm] : std::views::zip(vertex_idx, uv_idx, norm_idx)) {
     //     verts.push_back(Vertex(tmp_vertices[vert-1], tmp_uv[uv-1]));
