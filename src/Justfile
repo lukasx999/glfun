@@ -1,0 +1,8 @@
+configure:
+    cmake build
+
+build: configure
+    cmake --build build
+
+run: build
+    ./build/glfun
