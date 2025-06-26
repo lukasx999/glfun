@@ -293,7 +293,7 @@ int main() {
             old = now;
         });
 
-        float yaw = 0;
+        float yaw = -90;
         float pitch = 0;
 
         while (!glfwWindowShouldClose(window)) {
@@ -302,7 +302,6 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
             for (auto &pos : positions) {
 
                 glm::mat4 u_model(1.0f);
@@ -310,12 +309,14 @@ int main() {
                 u_model = glm::rotate(u_model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
                 float factor = 5;
-                yaw   -= mouse_delta.x * dt * factor;
+                yaw   += mouse_delta.x * dt * factor;
                 pitch -= mouse_delta.y * dt * factor;
 
-                glm::vec3 cam_direction(0.0f, 0.0f, -1.0f);
-                cam_direction = glm::rotate(cam_direction, glm::radians(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
-                cam_direction = glm::rotate(cam_direction, glm::radians(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+                glm::vec3 cam_direction(0.0f);
+                cam_direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+                cam_direction.y = sin(glm::radians(pitch));
+                cam_direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+                cam_direction = glm::normalize(cam_direction);
 
                 auto u_view = glm::lookAt(cam_pos, cam_pos + cam_direction, cam_up);
 
