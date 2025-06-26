@@ -48,7 +48,11 @@ struct State {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Cube", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
+    assert(window != nullptr);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
     gladLoadGL(glfwGetProcAddress);
@@ -274,11 +278,23 @@ int main() {
           .add<float>(col, 3);
 
         glm::vec3 cam_pos(0.0f, 0.0f, 3.0f);
-        glm::vec3 cam_direction(0.0f, 0.0f, -1.0f);
         glm::vec3 cam_up(0.0f, 1.0f, 0.0f);
 
         float dt = 0.0f;
         float last_frame = 0.0f;
+
+        glm::vec2 mouse_delta(0.0f);
+        glfwSetWindowUserPointer(window, &mouse_delta);
+        glfwSetCursorPosCallback(window, [](GLFWwindow *win, double x, double y) {
+            static glm::vec2 old(0.0f);
+            glm::vec2 now(x, y);
+            auto &delta = *static_cast<glm::vec2*>(glfwGetWindowUserPointer(win));
+            delta = now - old;
+            old = now;
+        });
+
+        float yaw = 0;
+        float pitch = 0;
 
         while (!glfwWindowShouldClose(window)) {
             dt = glfwGetTime() - last_frame;
@@ -286,13 +302,22 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
             for (auto &pos : positions) {
 
-                glm::mat4 model(1.0f);
-                model = glm::translate(model, pos);
-                model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+                glm::mat4 u_model(1.0f);
+                u_model = glm::translate(u_model, pos);
+                u_model = glm::rotate(u_model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
-                auto view = glm::lookAt(cam_pos, cam_pos + cam_direction, cam_up);
+                float factor = 5;
+                yaw   -= mouse_delta.x * dt * factor;
+                pitch -= mouse_delta.y * dt * factor;
+
+                glm::vec3 cam_direction(0.0f, 0.0f, -1.0f);
+                cam_direction = glm::rotate(cam_direction, glm::radians(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+                cam_direction = glm::rotate(cam_direction, glm::radians(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+
+                auto u_view = glm::lookAt(cam_pos, cam_pos + cam_direction, cam_up);
 
                 float cam_speed = 2.5f * dt;
 
@@ -312,17 +337,19 @@ int main() {
                     cam_pos -= glm::normalize(glm::cross(cam_direction, cam_up)) * cam_speed;
                 }
 
-                auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
+                auto u_projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
 
-                shader.set_uniform("u_model", model);
-                shader.set_uniform("u_view", view);
-                shader.set_uniform("u_projection", projection);
+                shader.set_uniform("u_model", u_model);
+                shader.set_uniform("u_view", u_view);
+                shader.set_uniform("u_projection", u_projection);
 
                 texture.bind();
                 shader.use();
                 va.bind();
                 glDrawArrays(GL_TRIANGLES, 0, vertices.size());
             }
+
+            mouse_delta = glm::vec2(0.0f);
 
             process_inputs(window, state);
             glfwSwapBuffers(window);
