@@ -226,7 +226,20 @@ int main() {
         Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
         Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
         Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f })
+        Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
+    };
+
+    std::array positions {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f),
     };
 
     State state;
@@ -279,6 +292,10 @@ int main() {
             state.u_zoom += yoffset / 100;
         });
 
+        float cam_speed = 0.01f;
+        glm::vec3 cam_pos(0.0f, 0.0f, 3.0f);
+        glm::vec3 cam_direction(0.0f, 0.0f, -1.0f);
+        glm::vec3 cam_up(0.0f, 1.0f, 0.0f);
 
         while (!glfwWindowShouldClose(window)) {
 
@@ -286,26 +303,44 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glm::mat4 model(1.0f);
-            float x = glfwGetTime();
-            model = glm::rotate(model, glm::radians(x * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+            for (auto &pos : positions) {
 
-            glm::mat4 view(1.0f);
-            view = glm::translate(view, glm::vec3(0.0f, 0.0f, -1.0f));
+                glm::mat4 model(1.0f);
+                model = glm::translate(model, pos);
+                model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
-            auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
+                auto view = glm::lookAt(cam_pos, cam_pos + cam_direction, cam_up);
 
-            shader.set_uniform("u_model", model);
-            shader.set_uniform("u_view", view);
-            shader.set_uniform("u_projection", projection);
+                if (is_key_down(window, GLFW_KEY_W)) {
+                    cam_pos += cam_direction * cam_speed;
+                }
 
-            shader.set_uniform("u_mat", state.u_mat);
-            shader.set_uniform("u_zoom", state.u_zoom);
+                if (is_key_down(window, GLFW_KEY_S)) {
+                    cam_pos -= cam_direction * cam_speed;
+                }
 
-            texture.bind();
-            shader.use();
-            va.bind();
-            glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+                if (is_key_down(window, GLFW_KEY_D)) {
+                    cam_pos += glm::normalize(glm::cross(cam_direction, cam_up)) * cam_speed;
+                }
+
+                if (is_key_down(window, GLFW_KEY_A)) {
+                    cam_pos -= glm::normalize(glm::cross(cam_direction, cam_up)) * cam_speed;
+                }
+
+                auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
+
+                shader.set_uniform("u_model", model);
+                shader.set_uniform("u_view", view);
+                shader.set_uniform("u_projection", projection);
+
+                shader.set_uniform("u_mat", state.u_mat);
+                shader.set_uniform("u_zoom", state.u_zoom);
+
+                texture.bind();
+                shader.use();
+                va.bind();
+                glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+            }
 
             process_inputs(window, state);
             glfwSwapBuffers(window);
