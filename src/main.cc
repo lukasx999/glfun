@@ -81,7 +81,7 @@ using GLFWKey = int;
     return glfwGetKey(window, key) == GLFW_PRESS;
 }
 
-static void process_inputs(GLFWwindow *window, State &state) {
+static void process_inputs(GLFWwindow *window, State &state, float dt) {
 
     if (is_key_rising(window, GLFW_KEY_K)) {
         state.polygon_mode = !state.polygon_mode;
@@ -91,6 +91,11 @@ static void process_inputs(GLFWwindow *window, State &state) {
 
     if (is_key_down(window, GLFW_KEY_ESCAPE))
         glfwSetWindowShouldClose(window, 1);
+
+    if (is_key_down(window, GLFW_KEY_W)) state.cam.move_forward(dt);
+    if (is_key_down(window, GLFW_KEY_A)) state.cam.move_left(dt);
+    if (is_key_down(window, GLFW_KEY_S)) state.cam.move_backward(dt);
+    if (is_key_down(window, GLFW_KEY_D)) state.cam.move_right(dt);
 
 }
 
@@ -278,17 +283,16 @@ int main() {
           .add<float>(uv,  2)
           .add<float>(col, 3);
 
-
         float dt = 0.0f;
         float last_frame = 0.0f;
 
-        glm::vec2 mouse_delta(0.0f);
-        glfwSetWindowUserPointer(window, &mouse_delta);
+        glfwSetWindowUserPointer(window, &state);
         glfwSetCursorPosCallback(window, [](GLFWwindow *win, double x, double y) {
             static glm::vec2 old(0.0f);
             glm::vec2 now(x, y);
-            auto &delta = *static_cast<glm::vec2*>(glfwGetWindowUserPointer(win));
-            delta = now - old;
+            auto &state = *static_cast<State*>(glfwGetWindowUserPointer(win));
+            auto delta = now - old;
+            state.cam.rotate(delta);
             old = now;
         });
 
@@ -298,25 +302,18 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            auto u_view = state.cam.get_view_matrix();
+            auto u_projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
+
             for (auto &pos : positions) {
 
                 glm::mat4 u_model(1.0f);
                 u_model = glm::translate(u_model, pos);
                 u_model = glm::rotate(u_model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
-                state.cam.rotate(mouse_delta, dt);
-                auto u_view = state.cam.get_view_matrix();
-
-                if (is_key_down(window, GLFW_KEY_W)) state.cam.move_forward(dt);
-                if (is_key_down(window, GLFW_KEY_A)) state.cam.move_left(dt);
-                if (is_key_down(window, GLFW_KEY_S)) state.cam.move_backward(dt);
-                if (is_key_down(window, GLFW_KEY_D)) state.cam.move_right(dt);
-
-                auto u_projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
-
-                shader.set_uniform("u_model", u_model);
-                shader.set_uniform("u_view", u_view);
-                shader.set_uniform("u_projection", u_projection);
+                shader.set_uniform("u_model", u_model)
+                      .set_uniform("u_view", u_view)
+                      .set_uniform("u_projection", u_projection);
 
                 texture.bind();
                 shader.use();
@@ -324,9 +321,7 @@ int main() {
                 glDrawArrays(GL_TRIANGLES, 0, vertices.size());
             }
 
-            mouse_delta = glm::vec2(0.0f);
-
-            process_inputs(window, state);
+            process_inputs(window, state, dt);
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
