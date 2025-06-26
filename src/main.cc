@@ -34,6 +34,7 @@ static constexpr int WIDTH  = 1600;
 static constexpr int HEIGHT = 900;
 
 struct State {
+    Camera cam { { 0.0f, 0.0f, 3.0f } };
     bool polygon_mode = false;
 };
 
@@ -277,8 +278,6 @@ int main() {
           .add<float>(uv,  2)
           .add<float>(col, 3);
 
-        glm::vec3 cam_pos(0.0f, 0.0f, 3.0f);
-        glm::vec3 cam_up(0.0f, 1.0f, 0.0f);
 
         float dt = 0.0f;
         float last_frame = 0.0f;
@@ -293,9 +292,6 @@ int main() {
             old = now;
         });
 
-        float yaw = -90;
-        float pitch = 0;
-
         while (!glfwWindowShouldClose(window)) {
             dt = glfwGetTime() - last_frame;
             last_frame = glfwGetTime();
@@ -308,35 +304,13 @@ int main() {
                 u_model = glm::translate(u_model, pos);
                 u_model = glm::rotate(u_model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
-                float factor = 5;
-                yaw   += mouse_delta.x * dt * factor;
-                pitch -= mouse_delta.y * dt * factor;
+                state.cam.rotate(mouse_delta, dt);
+                auto u_view = state.cam.get_view_matrix();
 
-                glm::vec3 cam_direction(0.0f);
-                cam_direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-                cam_direction.y = sin(glm::radians(pitch));
-                cam_direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-                cam_direction = glm::normalize(cam_direction);
-
-                auto u_view = glm::lookAt(cam_pos, cam_pos + cam_direction, cam_up);
-
-                float cam_speed = 2.5f * dt;
-
-                if (is_key_down(window, GLFW_KEY_W)) {
-                    cam_pos += cam_direction * cam_speed;
-                }
-
-                if (is_key_down(window, GLFW_KEY_S)) {
-                    cam_pos -= cam_direction * cam_speed;
-                }
-
-                if (is_key_down(window, GLFW_KEY_D)) {
-                    cam_pos += glm::normalize(glm::cross(cam_direction, cam_up)) * cam_speed;
-                }
-
-                if (is_key_down(window, GLFW_KEY_A)) {
-                    cam_pos -= glm::normalize(glm::cross(cam_direction, cam_up)) * cam_speed;
-                }
+                if (is_key_down(window, GLFW_KEY_W)) state.cam.move_forward(dt);
+                if (is_key_down(window, GLFW_KEY_A)) state.cam.move_left(dt);
+                if (is_key_down(window, GLFW_KEY_S)) state.cam.move_backward(dt);
+                if (is_key_down(window, GLFW_KEY_D)) state.cam.move_right(dt);
 
                 auto u_projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
 
