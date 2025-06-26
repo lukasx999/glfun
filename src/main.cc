@@ -112,6 +112,7 @@ void print_useful_info() {
     std::println("version: {}", glstr_to_cstr(glGetString(GL_VERSION)));
     std::println("renderer: {}", glstr_to_cstr(glGetString(GL_RENDERER)));
     std::println("shading language version: {}", glstr_to_cstr(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+    std::println();
 }
 
 [[nodiscard]] static std::vector<Vertex> parse_obj(const char *filename) {
@@ -186,6 +187,36 @@ void print_useful_info() {
     }
 
     return verts;
+}
+
+[[nodiscard]] constexpr auto gl_debug_type_to_cstr(GLenum type) {
+    switch (type) {
+        case GL_DEBUG_TYPE_ERROR:
+            return "ERROR";
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            return "DEPRECATED_BEHAVIOR";
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            return "UNDEFINED_BEHAVIOR";
+        case GL_DEBUG_TYPE_PORTABILITY:
+            return "PORTABILITY";
+        case GL_DEBUG_TYPE_PERFORMANCE:
+            return "PERFORMANCE";
+        case GL_DEBUG_TYPE_OTHER:
+            return "OTHER";
+    }
+    std::unreachable();
+}
+
+[[nodiscard]] constexpr auto gl_debug_severity_to_cstr(GLenum severity) {
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_LOW:
+            return "LOW";
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            return "MEDIUM";
+        case GL_DEBUG_SEVERITY_HIGH:
+            return "HIGH";
+    }
+    std::unreachable();
 }
 
 int main() {
@@ -268,7 +299,13 @@ int main() {
             [[maybe_unused]] GLsizei len,
             const char *msg,
             [[maybe_unused]] const void *args
-        ) { std::println(stderr, "OpenGL Error: {}", msg); }, nullptr);
+        ) {
+            std::println(stderr, "> OpenGL Error");
+            std::println(stderr, "Type: {}", gl_debug_type_to_cstr(type));
+            std::println(stderr, "Severity: {}", gl_debug_severity_to_cstr(severity));
+            std::println(stderr, "Message: {}", msg);
+            std::println(stderr);
+        }, nullptr);
 
         print_useful_info();
 
@@ -290,12 +327,10 @@ int main() {
 
         GLuint pos = shader.get_attrib_loc("a_pos");
         GLuint uv  = shader.get_attrib_loc("a_uv");
-        GLuint col = shader.get_attrib_loc("a_col");
 
         VertexArray va;
         va.add<float>(pos, 3)
-          .add<float>(uv,  2)
-          .add<float>(col, 3);
+          .add<float>(uv, 2);
 
         float dt = 0.0f;
         float last_frame = 0.0f;

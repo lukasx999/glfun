@@ -28,8 +28,7 @@ public:
     Shader &set_uniform(const char *name, glm::mat4 value);
 
 private:
-    [[nodiscard]] std::string read_entire_file(const char *filename) const;
-    [[nodiscard]] GLuint link_shaders(GLuint vert, GLuint frag) const;
-    [[nodiscard]] GLuint compile_shader(GLenum type, const char *filename) const;
+    [[nodiscard]] static GLuint link_shaders(GLuint vert, GLuint frag);
+    [[nodiscard]] static GLuint compile_shader(GLenum type, const char *filename);
 
 };

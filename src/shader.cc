@@ -52,16 +52,7 @@ Shader &Shader::use() {
     return *this;
 }
 
-[[nodiscard]]
-std::string Shader::read_entire_file(const char *filename) const {
-    std::ifstream file(filename);
-    return std::string(
-        (std::istreambuf_iterator<char>(file)),
-        (std::istreambuf_iterator<char>())
-    );
-}
-
-[[nodiscard]] GLuint Shader::link_shaders(GLuint vert, GLuint frag) const {
+[[nodiscard]] GLuint Shader::link_shaders(GLuint vert, GLuint frag) {
     GLuint prog = glCreateProgram();
     glAttachShader(prog, vert);
     glAttachShader(prog, frag);
@@ -71,10 +62,10 @@ std::string Shader::read_entire_file(const char *filename) const {
 
     int success;
     char info_log[512] = { 0 };
-    glGetProgramiv(m_id, GL_LINK_STATUS, &success);
+    glGetProgramiv(prog, GL_LINK_STATUS, &success);
 
     if (!success) {
-        glGetProgramInfoLog(m_id, sizeof(info_log), nullptr, info_log);
+        glGetProgramInfoLog(prog, sizeof(info_log), nullptr, info_log);
         std::println(stderr, "Shader Program Linkage failed: {}", info_log);
     }
 
@@ -82,8 +73,12 @@ std::string Shader::read_entire_file(const char *filename) const {
 }
 
 [[nodiscard]]
-GLuint Shader::compile_shader(GLenum type, const char *filename) const {
-    std::string src = read_entire_file(filename);
+GLuint Shader::compile_shader(GLenum type, const char *filename) {
+    std::ifstream file(filename);
+    std::string src(
+        (std::istreambuf_iterator<char>(file)),
+        (std::istreambuf_iterator<char>())
+    );
 
     const char *src_raw = src.c_str();
     GLuint shader = glCreateShader(type);

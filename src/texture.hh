@@ -31,30 +31,30 @@ private:
     using StbiData = std::unique_ptr<uint8_t, StbiDeleter>;
     using ImageData = std::tuple<StbiData, int, int>;
 
-    [[nodiscard]] ImageData load_image(
+    [[nodiscard]] static ImageData load_image(
         const char *filename,
         bool flip_vert
-    ) const;
+    );
 
-    [[nodiscard]] GLuint load_texture(
+    [[nodiscard]] static GLuint load_texture(
         const char *filename,
         bool flip_vert,
         GLenum format,
         int resize_width,
         int resize_height
-    ) const;
+    );
 
-    [[nodiscard]] GLuint load_texture(
+    [[nodiscard]] static GLuint load_texture(
         const char *filename,
         bool flip_vert,
         GLenum format
-    ) const;
+    );
 
-    [[nodiscard]] GLuint create_texture(
+    [[nodiscard]] static GLuint create_texture(
         GLenum format,
         int width,
         int height,
         StbiData data
-    ) const;
+    );
 
 };
