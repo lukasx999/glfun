@@ -35,6 +35,7 @@ static constexpr int HEIGHT = 900;
 
 struct State {
     Camera cam { { 0.0f, 0.0f, 3.0f } };
+    float fov_deg = 45.0f;
     bool polygon_mode = false;
 };
 
@@ -287,13 +288,31 @@ int main() {
         float last_frame = 0.0f;
 
         glfwSetWindowUserPointer(window, &state);
+
         glfwSetCursorPosCallback(window, [](GLFWwindow *win, double x, double y) {
             static glm::vec2 old(0.0f);
+
+            auto *state_ptr = static_cast<State*>(glfwGetWindowUserPointer(win));
+            assert(state_ptr != nullptr);
+            auto &state = *state_ptr;
+
             glm::vec2 now(x, y);
-            auto &state = *static_cast<State*>(glfwGetWindowUserPointer(win));
+
             auto delta = now - old;
             state.cam.rotate(delta);
             old = now;
+        });
+
+        glfwSetScrollCallback(window, [](GLFWwindow *win, [[maybe_unused]] double x, double y) {
+            float scroll_factor = 10.0f;
+            float max_fov = 90.0f;
+
+            auto *state_ptr = static_cast<State*>(glfwGetWindowUserPointer(win));
+            assert(state_ptr != nullptr);
+            auto &state = *state_ptr;
+
+            state.fov_deg -= y * scroll_factor;
+            state.fov_deg = std::clamp(state.fov_deg, 1.0f, max_fov);
         });
 
         while (!glfwWindowShouldClose(window)) {
@@ -303,7 +322,9 @@ int main() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             auto u_view = state.cam.get_view_matrix();
-            auto u_projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
+
+            float aspect_ratio = static_cast<float>(WIDTH) / HEIGHT;
+            auto u_projection = glm::perspective(glm::radians(state.fov_deg), aspect_ratio, 0.1f, 100.0f);
 
             for (auto &pos : positions) {
 
@@ -311,9 +332,8 @@ int main() {
                 u_model = glm::translate(u_model, pos);
                 u_model = glm::rotate(u_model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
-                shader.set_uniform("u_model", u_model)
-                      .set_uniform("u_view", u_view)
-                      .set_uniform("u_projection", u_projection);
+                auto u_mvp = u_projection * u_view * u_model;
+                shader.set_uniform("u_mvp", u_mvp);
 
                 texture.bind();
                 shader.use();
