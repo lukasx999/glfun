@@ -185,13 +185,53 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
+    std::array vertices {
+        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 0.0f }),
+        Vertex({  0.5f, -0.5f, -0.5f },  { 1.0f, 0.0f }),
+        Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+        Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+        Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 0.0f }),
+
+        Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+        Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 1.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 1.0f }),
+        Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+
+        Vertex({ -0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+        Vertex({ -0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+        Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+        Vertex({ -0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+
+        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+        Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+        Vertex({  0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+        Vertex({  0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+        Vertex({  0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+
+        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+        Vertex({  0.5f, -0.5f, -0.5f },  { 1.0f, 1.0f }),
+        Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
+        Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
+        Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+
+        Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
+        Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+        Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 0.0f }),
+        Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f })
+    };
+
     State state;
 
-    auto vertices = parse_obj("./assets/teapot.obj");
-
-    // for (auto &v : vertices) {
-    //     std::println("{}, {}, {}", v.m_pos.x, v.m_pos.y, v.m_pos.z);
-    // }
+    // auto vertices = parse_obj("./assets/cow.obj");
 
     GLFWwindow *window = setup_glfw();
     {
@@ -206,13 +246,16 @@ int main() {
             [[maybe_unused]] const void *args
         ) { std::println(stderr, "OpenGL Error: {}", msg); }, nullptr);
 
-        Shader shader("vert.glsl", "frag.glsl");
+
+        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        glEnable(GL_DEPTH_TEST);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        Shader shader("vert.glsl", "frag.glsl");
 
         shader.use()
               .set_uniform("tex", 0);
@@ -220,7 +263,7 @@ int main() {
         VertexArray va;
         VertexBuffer vb(vertices);
 
-        // Texture texture(GL_TEXTURE0, "./texture.png", false, GL_RGBA);
+        Texture texture(GL_TEXTURE0, "./assets/awesomeface.png", false, GL_RGBA);
 
         GLuint pos = shader.get_attrib_loc("a_pos");
         GLuint uv  = shader.get_attrib_loc("a_uv");
@@ -230,30 +273,36 @@ int main() {
           .add<float>(uv,  2)
           .add<float>(col, 3);
 
-        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
-
         glfwSetWindowUserPointer(window, &state);
         glfwSetScrollCallback(window, [](GLFWwindow* window, [[maybe_unused]] double xoffset, double yoffset) {
             auto &state = *static_cast<State*>(glfwGetWindowUserPointer(window));
             state.u_zoom += yoffset / 100;
         });
 
+
         while (!glfwWindowShouldClose(window)) {
 
             state.u_zoom = std::clamp(state.u_zoom, 0.0f, 1.0f);
 
-            glm::mat4 u_transform(1.0f);
-            float x = glfwGetTime() * 45.0f;
-            u_transform = glm::rotate(u_transform, glm::radians(x), glm::vec3(0.0f, 1.0f, 0.0f));
-
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glm::mat4 model(1.0f);
+            float x = glfwGetTime();
+            model = glm::rotate(model, glm::radians(x * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+
+            glm::mat4 view(1.0f);
+            view = glm::translate(view, glm::vec3(0.0f, 0.0f, -1.0f));
+
+            auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.0f);
+
+            shader.set_uniform("u_model", model);
+            shader.set_uniform("u_view", view);
+            shader.set_uniform("u_projection", projection);
 
             shader.set_uniform("u_mat", state.u_mat);
             shader.set_uniform("u_zoom", state.u_zoom);
-            shader.set_uniform("u_transform", u_transform);
 
-            // texture.bind();
+            texture.bind();
             shader.use();
             va.bind();
             glDrawArrays(GL_TRIANGLES, 0, vertices.size());

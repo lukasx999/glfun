@@ -27,9 +27,7 @@ public:
     Texture &bind();
 
 private:
-    using StbiDeleter = decltype([](uint8_t *data) {
-        stbi_image_free(data);
-    });
+    using StbiDeleter = decltype([](uint8_t *data) { stbi_image_free(data); });
     using StbiData = std::unique_ptr<uint8_t, StbiDeleter>;
     using ImageData = std::tuple<StbiData, int, int>;
 
