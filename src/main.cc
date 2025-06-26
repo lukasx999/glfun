@@ -32,6 +32,8 @@
 
 static constexpr int WIDTH  = 1600;
 static constexpr int HEIGHT = 900;
+static constexpr auto SHADER_VERT = "shader.vert";
+static constexpr auto SHADER_FRAG = "shader.frag";
 
 struct State {
     Camera cam { { 0.0f, 0.0f, 3.0f } };
@@ -48,6 +50,7 @@ struct State {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
@@ -84,7 +87,7 @@ using GLFWKey = int;
 
 static void process_inputs(GLFWwindow *window, State &state, float dt) {
 
-    if (is_key_rising(window, GLFW_KEY_K)) {
+    if (is_key_rising(window, GLFW_KEY_E)) {
         state.polygon_mode = !state.polygon_mode;
     }
 
@@ -100,6 +103,16 @@ static void process_inputs(GLFWwindow *window, State &state, float dt) {
 
 }
 
+[[nodiscard]] auto glstr_to_cstr(const GLubyte *glstr) {
+    return reinterpret_cast<const char*>(glstr);
+}
+
+void print_useful_info() {
+    std::println("vendor: {}", glstr_to_cstr(glGetString(GL_VENDOR)));
+    std::println("version: {}", glstr_to_cstr(glGetString(GL_VERSION)));
+    std::println("renderer: {}", glstr_to_cstr(glGetString(GL_RENDERER)));
+    std::println("shading language version: {}", glstr_to_cstr(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+}
 
 [[nodiscard]] static std::vector<Vertex> parse_obj(const char *filename) {
     std::ifstream file(filename);
@@ -242,7 +255,7 @@ int main() {
 
     State state;
 
-    // auto vertices = parse_obj("./assets/cow.obj");
+    // auto cow = parse_obj("./assets/cow.obj");
 
     GLFWwindow *window = setup_glfw();
     {
@@ -257,6 +270,7 @@ int main() {
             [[maybe_unused]] const void *args
         ) { std::println(stderr, "OpenGL Error: {}", msg); }, nullptr);
 
+        print_useful_info();
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
@@ -266,13 +280,11 @@ int main() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        Shader shader("vert.glsl", "frag.glsl");
+        VertexBuffer vb(vertices);
 
+        Shader shader(SHADER_VERT, SHADER_FRAG);
         shader.use()
               .set_uniform("tex", 0);
-
-        VertexArray va;
-        VertexBuffer vb(vertices);
 
         Texture texture(GL_TEXTURE0, "./assets/awesomeface.png", false, GL_RGBA);
 
@@ -280,6 +292,7 @@ int main() {
         GLuint uv  = shader.get_attrib_loc("a_uv");
         GLuint col = shader.get_attrib_loc("a_col");
 
+        VertexArray va;
         va.add<float>(pos, 3)
           .add<float>(uv,  2)
           .add<float>(col, 3);
@@ -316,6 +329,7 @@ int main() {
         });
 
         while (!glfwWindowShouldClose(window)) {
+
             dt = glfwGetTime() - last_frame;
             last_frame = glfwGetTime();
 
@@ -338,7 +352,9 @@ int main() {
                 texture.bind();
                 shader.use();
                 va.bind();
+
                 glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
             }
 
             process_inputs(window, state, dt);

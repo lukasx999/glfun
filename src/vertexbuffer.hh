@@ -19,9 +19,29 @@ class VertexBuffer {
     GLuint m_id;
 
 public:
-    VertexBuffer(std::span<Vertex> vertices);
-    ~VertexBuffer();
-    VertexBuffer &bind();
-    VertexBuffer &unbind();
+    VertexBuffer(std::span<Vertex> vertices) {
+        glGenBuffers(1, &m_id);
+        bind();
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertices.size() * sizeof(Vertex),
+            vertices.data(),
+            GL_STATIC_DRAW
+        );
+    }
+
+    ~VertexBuffer() {
+        glDeleteBuffers(1, &m_id);
+    }
+
+    VertexBuffer &bind() {
+        glBindBuffer(GL_ARRAY_BUFFER, m_id);
+        return *this;
+    }
+
+    VertexBuffer &unbind() {
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        return *this;
+    }
 
 };

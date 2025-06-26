@@ -6,3 +6,7 @@ build: configure
 
 run: build
     ./build/glfun
+
+check:
+    glslangValidator shader.vert
+    glslangValidator shader.frag
