@@ -21,6 +21,7 @@
 #include "indexbuffer.hh"
 #include "shader.hh"
 #include "texture.hh"
+#include "camera.hh"
 
 #include "glad/gl.h"
 
@@ -33,8 +34,6 @@ static constexpr int WIDTH  = 1600;
 static constexpr int HEIGHT = 900;
 
 struct State {
-    float u_zoom = 0.1;
-    glm::mat4 u_mat { 1.0f };
     bool polygon_mode = false;
 };
 
@@ -87,18 +86,6 @@ static void process_inputs(GLFWwindow *window, State &state) {
 
     if (is_key_down(window, GLFW_KEY_ESCAPE))
         glfwSetWindowShouldClose(window, 1);
-
-    if (is_key_down(window, GLFW_KEY_RIGHT))
-        state.u_mat = glm::rotate(state.u_mat, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    if (is_key_down(window, GLFW_KEY_LEFT))
-        state.u_mat = glm::rotate(state.u_mat, -glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    if (is_key_down(window, GLFW_KEY_UP))
-        state.u_mat = glm::rotate(state.u_mat, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-    if (is_key_down(window, GLFW_KEY_DOWN))
-        state.u_mat = glm::rotate(state.u_mat, -glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 }
 
@@ -286,20 +273,16 @@ int main() {
           .add<float>(uv,  2)
           .add<float>(col, 3);
 
-        glfwSetWindowUserPointer(window, &state);
-        glfwSetScrollCallback(window, [](GLFWwindow* window, [[maybe_unused]] double xoffset, double yoffset) {
-            auto &state = *static_cast<State*>(glfwGetWindowUserPointer(window));
-            state.u_zoom += yoffset / 100;
-        });
-
-        float cam_speed = 0.01f;
         glm::vec3 cam_pos(0.0f, 0.0f, 3.0f);
         glm::vec3 cam_direction(0.0f, 0.0f, -1.0f);
         glm::vec3 cam_up(0.0f, 1.0f, 0.0f);
 
-        while (!glfwWindowShouldClose(window)) {
+        float dt = 0.0f;
+        float last_frame = 0.0f;
 
-            state.u_zoom = std::clamp(state.u_zoom, 0.0f, 1.0f);
+        while (!glfwWindowShouldClose(window)) {
+            dt = glfwGetTime() - last_frame;
+            last_frame = glfwGetTime();
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -310,6 +293,8 @@ int main() {
                 model = glm::rotate(model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
                 auto view = glm::lookAt(cam_pos, cam_pos + cam_direction, cam_up);
+
+                float cam_speed = 2.5f * dt;
 
                 if (is_key_down(window, GLFW_KEY_W)) {
                     cam_pos += cam_direction * cam_speed;
@@ -332,9 +317,6 @@ int main() {
                 shader.set_uniform("u_model", model);
                 shader.set_uniform("u_view", view);
                 shader.set_uniform("u_projection", projection);
-
-                shader.set_uniform("u_mat", state.u_mat);
-                shader.set_uniform("u_zoom", state.u_zoom);
 
                 texture.bind();
                 shader.use();
