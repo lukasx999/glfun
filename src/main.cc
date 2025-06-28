@@ -1,4 +1,6 @@
+#include "obj.hh"
 #include <print>
+#include <unordered_map>
 #include <vector>
 #include <regex>
 #include <array>
@@ -286,7 +288,14 @@ int main() {
 
     State state;
 
-    // auto cow = parse_obj("./assets/cow.obj");
+
+    std::ifstream file("./assets/cube.obj");
+    std::string obj_src((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    Lexer lexer(obj_src);
+    auto tok = lexer.next();
+    PRINT(tok);
+
+    // auto cow = parse_obj("./assets/cube.obj");
 
     GLFWwindow *window = setup_glfw();
     {
