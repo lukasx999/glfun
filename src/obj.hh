@@ -46,16 +46,6 @@ struct std::formatter<Token> : std::formatter<std::string> {
     }
 };
 
-std::string read_while(std::istringstream &stream, std::function<bool(char)> predicate) {
-
-    char c;
-    std::string acc;
-    while (predicate(c = stream.get())) {
-        acc.push_back(c);
-    }
-
-    return acc;
-}
 
 class Lexer {
     std::istringstream m_src;
@@ -66,24 +56,53 @@ public:
     { }
 
     [[nodiscard]] Token next() {
-        char c = m_src.get();
-        std::print("{}", c);
+        char c = m_src.peek();
+        // std::print("{}", c);
 
         switch (c) {
             case ' ':
             case '\t':
+                // m_src.get();
                 return next();
                 break;
             default: {
 
                 auto ident = read_while(m_src, isalpha);
-                std::println("{}", ident);
 
-                return ident;
+                // auto num = read_while(m_src, isdigit);
+
+                if (ident.has_value()) {
+                    std::println("{}", ident.value());
+                    return ident.value();
+                }
+
+                // if (num.has_value()) {
+                //     std::println("{}", num.value());
+                //     return num.value();
+                // }
+
 
 
             } break;
         }
+    }
+
+private:
+    static std::optional<std::string> read_while(
+        std::istringstream &stream,
+        std::function<bool(char)> predicate
+    ) {
+
+        if (!predicate(stream.peek())) return { };
+
+        char c;
+        std::string acc;
+
+        while (predicate(c = stream.get())) {
+            acc.push_back(c);
+        }
+
+        return acc;
     }
 
 };

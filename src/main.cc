@@ -292,8 +292,8 @@ int main() {
     std::ifstream file("./assets/cube.obj");
     std::string obj_src((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     Lexer lexer(obj_src);
-    auto tok = lexer.next();
-    PRINT(tok);
+    lexer.next();
+    lexer.next();
 
     // auto cow = parse_obj("./assets/cube.obj");
 
