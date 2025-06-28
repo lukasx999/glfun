@@ -65,8 +65,8 @@ public:
                 // m_src.get();
                 return next();
                 break;
-            default: {
 
+            default: {
                 auto ident = read_while(m_src, isalpha);
 
                 // auto num = read_while(m_src, isdigit);
