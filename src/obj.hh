@@ -97,7 +97,7 @@ public:
                     return num.value();
                 }
 
-                return TokenInvalid();
+                return TokenInvalid{};
 
             } break;
         }
