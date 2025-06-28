@@ -294,6 +294,7 @@ int main() {
     Lexer lexer(obj_src);
     lexer.next();
     lexer.next();
+    lexer.next();
 
     // auto cow = parse_obj("./assets/cube.obj");
 
