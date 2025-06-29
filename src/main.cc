@@ -288,8 +288,7 @@ int main() {
 
     State state;
 
-
-    std::ifstream file("./assets/teapot.obj");
+    std::ifstream file("./assets/cow.obj");
     std::string obj_src((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     Parser parser(obj_src);
     auto vertices = parser.parse();
@@ -308,7 +307,7 @@ int main() {
             const char *msg,
             [[maybe_unused]] const void *args
         ) {
-            std::println(stderr, "> OpenGL Error");
+            std::println(stderr, "> OpenGL Error:");
             std::println(stderr, "Type: {}", gl_debug_type_to_cstr(type));
             std::println(stderr, "Severity: {}", gl_debug_severity_to_cstr(severity));
             std::println(stderr, "Message: {}", msg);

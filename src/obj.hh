@@ -217,14 +217,12 @@ class Parser {
     std::vector<unsigned int> m_normal_indices;
 
 public:
-
-    Parser(std::string src)
-    : m_lexer(std::move(src))
+    Parser(std::string src) : m_lexer(std::move(src))
     {
         m_lexer.next();
     }
 
-    auto parse() {
+    std::vector<Vertex> parse() {
 
         while (!std::holds_alternative<TokenInvalid>(m_lexer.peek())) {
             parse_line();
@@ -243,30 +241,33 @@ public:
 private:
     void parse_line() {
 
-        if (std::holds_alternative<TokenVertex>(m_lexer.peek())) {
+        auto tok = m_lexer.peek();
+
+        if (std::holds_alternative<TokenVertex>(tok)) {
             parse_vertex();
 
-        } else if (std::holds_alternative<TokenNormal>(m_lexer.peek())) {
+        } else if (std::holds_alternative<TokenNormal>(tok)) {
             parse_normal();
 
-        } else if (std::holds_alternative<TokenTexture>(m_lexer.peek())) {
+        } else if (std::holds_alternative<TokenTexture>(tok)) {
             parse_texture();
 
-        } else if (std::holds_alternative<TokenFace>(m_lexer.peek())) {
+        } else if (std::holds_alternative<TokenFace>(tok)) {
             parse_face();
 
-        } else if (std::holds_alternative<TokenIdent>(m_lexer.peek())) {
-            std::println(stderr, "OBJPARSE: Unsupported Instruction: `{}`", std::get<TokenIdent>(m_lexer.peek()));
+        } else if (std::holds_alternative<TokenIdent>(tok)) {
+            std::println(stderr, "> Obj Parser Warning:");
+            std::println(stderr, "Unsupported Instruction: `{}`", std::get<TokenIdent>(tok));
             m_lexer.skip_to_newline();
         }
 
         auto nl = m_lexer.next();
-        assert(std::holds_alternative<TokenNewline>(nl));
+        expect<TokenNewline>(nl);
 
     }
 
     void parse_face() {
-        assert(std::holds_alternative<TokenFace>(m_lexer.next()));
+        expect<TokenFace>(m_lexer.next());
         parse_face_index_triple();
         parse_face_index_triple();
         parse_face_index_triple();
@@ -274,50 +275,50 @@ private:
 
     void parse_face_index_triple() {
         auto vert_idx = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(vert_idx));
+        expect<TokenFloat>(vert_idx);
         m_vertex_indices.push_back(std::get<TokenFloat>(vert_idx));
 
         if (!std::holds_alternative<TokenSlash>(m_lexer.peek())) return;
         m_lexer.next();
 
         auto tex_idx = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(tex_idx));
+        expect<TokenFloat>(tex_idx);
         m_texture_indices.push_back(std::get<TokenFloat>(tex_idx));
 
         if (!std::holds_alternative<TokenSlash>(m_lexer.peek())) return;
         m_lexer.next();
 
         auto norm_idx = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(norm_idx));
+        expect<TokenFloat>(norm_idx);
         m_normal_indices.push_back(std::get<TokenFloat>(norm_idx));
     }
 
     void parse_texture() {
-        assert(std::holds_alternative<TokenTexture>(m_lexer.next()));
+        expect<TokenTexture>(m_lexer.next());
 
         auto u = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(u));
+        expect<TokenFloat>(u);
 
         auto v = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(v));
+        expect<TokenFloat>(v);
 
         m_uvs.push_back({
             std::get<TokenFloat>(u),
-            std::get<TokenFloat>(v)
+            std::get<TokenFloat>(v),
         });
     }
 
     void parse_normal() {
-        assert(std::holds_alternative<TokenNormal>(m_lexer.next()));
+        expect<TokenNormal>(m_lexer.next());
 
         auto x = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(x));
+        expect<TokenFloat>(x);
 
         auto y = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(y));
+        expect<TokenFloat>(y);
 
         auto z = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(z));
+        expect<TokenFloat>(z);
 
         m_normals.push_back({
             std::get<TokenFloat>(x),
@@ -327,23 +328,27 @@ private:
     }
 
     void parse_vertex() {
-        assert(std::holds_alternative<TokenVertex>(m_lexer.next()));
+        expect<TokenVertex>(m_lexer.next());
 
         auto x = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(x));
+        expect<TokenFloat>(x);
 
         auto y = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(y));
+        expect<TokenFloat>(y);
 
         auto z = m_lexer.next();
-        assert(std::holds_alternative<TokenFloat>(z));
+        expect<TokenFloat>(z);
 
         m_vertices.push_back({
             std::get<TokenFloat>(x),
             std::get<TokenFloat>(y),
             std::get<TokenFloat>(z)
         });
+    }
 
+    template <class TokenType>
+    static inline void expect(const Token &tok) {
+        assert(std::holds_alternative<TokenType>(tok));
     }
 
 };
