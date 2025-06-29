@@ -291,10 +291,8 @@ int main() {
 
     std::ifstream file("./assets/cube.obj");
     std::string obj_src((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    Lexer lexer(obj_src);
-    lexer.next();
-    lexer.next();
-    lexer.next();
+    Parser parser(obj_src);
+    parser.parse();
 
     // auto cow = parse_obj("./assets/cube.obj");
 

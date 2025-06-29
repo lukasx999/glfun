@@ -5,9 +5,9 @@
 #include <print>
 #include <array>
 #include <sstream>
+#include <variant>
 
 #include <glm/glm.hpp>
-#include <variant>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -46,27 +46,72 @@ using Token = std::variant<TokenVertex, TokenNormal, TokenTexture, TokenFace, To
 template <>
 struct std::formatter<Token> : std::formatter<std::string> {
     auto format(Token p, format_context &ctx) const {
-        return formatter<string>::format(
-            std::format("Token: {}", p.index()), ctx);
+
+        std::string fmt;
+
+        if (std::holds_alternative<TokenFloat>(p)) {
+            fmt = std::format("Float({})", std::get<TokenFloat>(p));
+
+        } else if (std::holds_alternative<TokenIdent>(p)) {
+            fmt = std::format("Ident({})", std::get<TokenIdent>(p));
+
+        } else if (std::holds_alternative<TokenVertex>(p)) {
+            fmt = "Vertex";
+
+        } else if (std::holds_alternative<TokenNormal>(p)) {
+            fmt = "Normal";
+
+        } else if (std::holds_alternative<TokenTexture>(p)) {
+            fmt = "TokenTexture";
+
+        } else if (std::holds_alternative<TokenFace>(p)) {
+            fmt = "TokenFace";
+
+        } else if (std::holds_alternative<TokenNewline>(p)) {
+            fmt = "TokenNewline";
+
+        } else if (std::holds_alternative<TokenInvalid>(p)) {
+            fmt = "TokenInvalid";
+        }
+
+        return formatter<string>::format(fmt, ctx);
     }
 };
 
 class Lexer {
     std::istringstream m_src;
+    Token m_tok = TokenInvalid{};
 
 public:
     Lexer(std::string src)
     : m_src(std::move(src))
     { }
 
+    [[nodiscard]] Token peek() const {
+        return m_tok;
+    }
+
     Token next() {
+        Token old = m_tok;
+        m_tok = impl_next();
+        std::println("Token: {}", old);
+        return old;
+    }
+
+private:
+    Token impl_next() {
         char c = m_src.peek();
 
         switch (c) {
             case ' ':
             case '\t':
                 m_src.ignore();
-                return next();
+                return impl_next();
+                break;
+
+            case '\n':
+                m_src.ignore();
+                return TokenNewline{};
                 break;
 
             default: {
@@ -103,12 +148,11 @@ public:
         }
     }
 
-private:
     std::optional<float> tokenize_float() {
 
-        float negative = false;
+        float is_negative = false;
         if (m_src.peek() == '-') {
-            negative = true;
+            is_negative = true;
             m_src.ignore();
         }
 
@@ -118,6 +162,7 @@ private:
             return { };
 
         std::optional<std::string> num2;
+
         if (m_src.peek() == '.') {
             m_src.ignore();
             num2 = read_while(isdigit);
@@ -131,7 +176,7 @@ private:
         if (num2.has_value())
             str += '.' + num2.value();
 
-        if (negative)
+        if (is_negative)
             str.insert(str.begin(), '-');
 
         return atof(str.c_str());
@@ -152,6 +197,110 @@ private:
         if (acc.empty()) return { };
 
         return acc;
+
+    }
+
+};
+
+class Parser {
+    Lexer m_lexer;
+    std::vector<glm::vec3> m_vertices;
+    std::vector<glm::vec3> m_normals;
+    std::vector<glm::vec2> m_uvs;
+
+public:
+    Parser(std::string src)
+    : m_lexer(std::move(src))
+    {
+        m_lexer.next();
+    }
+
+    void parse() {
+
+        if (std::holds_alternative<TokenVertex>(m_lexer.peek())) {
+            parse_vertex();
+        }
+
+        if (std::holds_alternative<TokenNormal>(m_lexer.peek())) {
+            parse_normal();
+        }
+
+        if (std::holds_alternative<TokenTexture>(m_lexer.peek())) {
+            parse_texture();
+        }
+
+    }
+
+private:
+    void parse_texture() {
+        auto tok = m_lexer.next();
+        assert(std::holds_alternative<TokenTexture>(tok));
+
+        auto u = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(u));
+
+        auto v = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(v));
+
+        auto nl = m_lexer.next();
+        assert(std::holds_alternative<TokenNewline>(nl));
+
+        m_uvs.push_back(
+            {
+                std::get<TokenFloat>(u),
+                std::get<TokenFloat>(v)
+            }
+        );
+    }
+
+    void parse_normal() {
+        auto tok = m_lexer.next();
+        assert(std::holds_alternative<TokenNormal>(tok));
+
+        auto x = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(x));
+
+        auto y = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(y));
+
+        auto z = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(z));
+
+        auto nl = m_lexer.next();
+        assert(std::holds_alternative<TokenNewline>(nl));
+
+        m_normals.push_back(
+            {
+                std::get<TokenFloat>(x),
+                std::get<TokenFloat>(y),
+                std::get<TokenFloat>(z)
+            }
+        );
+    }
+
+    void parse_vertex() {
+        auto tok = m_lexer.next();
+        assert(std::holds_alternative<TokenVertex>(tok));
+
+        auto x = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(x));
+
+        auto y = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(y));
+
+        auto z = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(z));
+
+        auto nl = m_lexer.next();
+        assert(std::holds_alternative<TokenNewline>(nl));
+
+        m_vertices.push_back(
+            {
+                std::get<TokenFloat>(x),
+                std::get<TokenFloat>(y),
+                std::get<TokenFloat>(z)
+            }
+        );
 
     }
 

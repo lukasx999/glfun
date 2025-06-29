@@ -1,4 +1,7 @@
-foo 123.456 bar
+v 0.0 0.0 0.0
+vn  0.0  1.0  0.0
+vt 0.50 0.75
+
 # cube-tex.obj
 # Import into Blender with Y-forward, Z-up
 #
