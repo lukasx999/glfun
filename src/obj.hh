@@ -4,6 +4,7 @@
 #include <functional>
 #include <print>
 #include <array>
+#include <ranges>
 #include <sstream>
 #include <variant>
 
@@ -59,14 +60,16 @@ struct std::formatter<Token> : std::formatter<std::string> {
         } else if (std::holds_alternative<TokenFace>(p)) {
             fmt = "TokenFace";
 
-        } else if (std::holds_alternative<TokenSlash>(p)) {
-            fmt = "TokenSlash";
+            // TODO: weird compile warning
 
-        } else if (std::holds_alternative<TokenNewline>(p)) {
-            fmt = "TokenNewline";
+        // } else if (std::holds_alternative<TokenSlash>(p)) {
+        //     fmt = "TokenSlash";
 
-        } else if (std::holds_alternative<TokenInvalid>(p)) {
-            fmt = "TokenInvalid";
+        // } else if (std::holds_alternative<TokenNewline>(p)) {
+        //     fmt = "TokenNewline";
+
+        // } else if (std::holds_alternative<TokenInvalid>(p)) {
+        //     fmt = "TokenInvalid";
 
         } else {
             throw std::runtime_error("token has no string representation");
@@ -128,6 +131,7 @@ private:
 
             default: {
                 auto ident = read_while(isalpha);
+                auto num = tokenize_float();
 
                 if (ident.has_value()) {
                     auto str = ident.value();
@@ -146,11 +150,8 @@ private:
 
                     else
                         return str;
-                }
 
-                auto num = tokenize_float();
-
-                if (num.has_value()) {
+                } else if (num.has_value()) {
                     return num.value();
                 }
 
@@ -237,8 +238,12 @@ public:
 
         std::vector<Vertex> verts;
 
-        for (auto &v : m_vertex_indices) {
-            verts.push_back(m_vertices[v-1]);
+        // for (auto &v : m_vertex_indices) {
+        //     verts.push_back(m_vertices[v-1]);
+        // }
+
+        for (auto [vert, tex, norm] : std::views::zip(m_vertex_indices, m_texture_indices, m_normal_indices)) {
+            verts.push_back({ m_vertices[vert-1], m_uvs[tex-1] });
         }
 
         return verts;
@@ -317,25 +322,17 @@ private:
 
     void parse_normal() {
         expect<TokenNormal>(m_lexer.next());
-
-        auto x = m_lexer.next();
-        expect<TokenFloat>(x);
-
-        auto y = m_lexer.next();
-        expect<TokenFloat>(y);
-
-        auto z = m_lexer.next();
-        expect<TokenFloat>(z);
-
-        m_normals.push_back({
-            std::get<TokenFloat>(x),
-            std::get<TokenFloat>(y),
-            std::get<TokenFloat>(z)
-        });
+        auto [x, y, z] = parse_xyz();
+        m_normals.push_back({ x, y, z });
     }
 
     void parse_vertex() {
         expect<TokenVertex>(m_lexer.next());
+        auto [x, y, z] = parse_xyz();
+        m_vertices.push_back({ x, y, z });
+    }
+
+    std::tuple<float, float, float> parse_xyz() {
 
         auto x = m_lexer.next();
         expect<TokenFloat>(x);
@@ -346,16 +343,21 @@ private:
         auto z = m_lexer.next();
         expect<TokenFloat>(z);
 
-        m_vertices.push_back({
+        return {
             std::get<TokenFloat>(x),
             std::get<TokenFloat>(y),
             std::get<TokenFloat>(z)
-        });
+        };
+
     }
 
     template <class TokenType>
     static inline void expect(const Token &tok) {
-        assert(std::holds_alternative<TokenType>(tok));
+        if (!std::holds_alternative<TokenType>(tok)) {
+            std::println(stderr, "> Obj Parser Error:");
+            std::println(stderr, "Unexpected Token `{}`", tok);
+            exit(EXIT_FAILURE);
+        }
     }
 
 };

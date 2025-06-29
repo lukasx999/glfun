@@ -288,7 +288,7 @@ int main() {
 
     State state;
 
-    std::ifstream file("./assets/cow.obj");
+    std::ifstream file("./backpack/backpack.obj");
     std::string obj_src((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     Parser parser(obj_src);
     auto vertices = parser.parse();
@@ -330,7 +330,8 @@ int main() {
         shader.use()
               .set_uniform("tex", 0);
 
-        Texture texture(GL_TEXTURE0, "./assets/awesomeface.png", false, GL_RGBA);
+        // Texture texture(GL_TEXTURE0, "./assets/awesomeface.png", false, GL_RGBA);
+        Texture texture(GL_TEXTURE0, "./backpack/diffuse.jpg", false, GL_RGB);
 
         GLuint pos = shader.get_attrib_loc("a_pos");
         GLuint uv  = shader.get_attrib_loc("a_uv");
@@ -386,7 +387,6 @@ int main() {
 
                 glm::mat4 u_model(1.0f);
                 u_model = glm::translate(u_model, pos);
-                u_model = glm::rotate(u_model, glm::radians(static_cast<float>(glfwGetTime()) * 45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
                 auto u_mvp = u_projection * u_view * u_model;
                 shader.set_uniform("u_mvp", u_mvp);
