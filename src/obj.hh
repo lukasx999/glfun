@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vertex.hh"
 #include <cstdlib>
 #include <functional>
 #include <print>
@@ -11,37 +12,17 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
-
-struct ObjVertex {
-    glm::vec3 m_v;
-};
-
-struct ObjNormal {
-    glm::vec3 m_vn;
-};
-
-struct ObjTexture {
-    glm::vec2 m_vt;
-};
-
-struct ObjFace {
-    std::array<unsigned int, 3> m_vertex_idx;
-    std::array<unsigned int, 3> m_uv_idx;
-    std::array<unsigned int, 3> m_normal_idx;
-};
-
-using Data = std::variant<ObjVertex, ObjNormal, ObjTexture, ObjFace>;
-
 class TokenVertex { };
 class TokenNormal { };
 class TokenTexture { };
 class TokenFace { };
 using TokenFloat = float;
 using TokenIdent = std::string;
+class TokenSlash { };
 class TokenNewline { };
 class TokenInvalid { };
 
-using Token = std::variant<TokenVertex, TokenNormal, TokenTexture, TokenFace, TokenFloat, TokenIdent, TokenNewline, TokenInvalid>;
+using Token = std::variant<TokenVertex, TokenNormal, TokenTexture, TokenFace, TokenFloat, TokenIdent, TokenSlash, TokenNewline, TokenInvalid>;
 
 template <>
 struct std::formatter<Token> : std::formatter<std::string> {
@@ -67,11 +48,17 @@ struct std::formatter<Token> : std::formatter<std::string> {
         } else if (std::holds_alternative<TokenFace>(p)) {
             fmt = "TokenFace";
 
+        } else if (std::holds_alternative<TokenSlash>(p)) {
+            fmt = "TokenSlash";
+
         } else if (std::holds_alternative<TokenNewline>(p)) {
             fmt = "TokenNewline";
 
         } else if (std::holds_alternative<TokenInvalid>(p)) {
             fmt = "TokenInvalid";
+
+        } else {
+            throw std::runtime_error("token has no string representation");
         }
 
         return formatter<string>::format(fmt, ctx);
@@ -94,8 +81,16 @@ public:
     Token next() {
         Token old = m_tok;
         m_tok = impl_next();
-        std::println("Token: {}", old);
         return old;
+    }
+
+    void skip_to_newline() {
+        read_while([](char c) { return c != '\n'; });
+        next();
+    }
+
+    [[nodiscard]] bool is_at_end() const {
+        return m_src.eof();
     }
 
 private:
@@ -112,6 +107,16 @@ private:
             case '\n':
                 m_src.ignore();
                 return TokenNewline{};
+                break;
+
+            case '/':
+                m_src.ignore();
+                return TokenSlash{};
+                break;
+
+            case '#':
+                skip_to_newline();
+                return peek();
                 break;
 
             default: {
@@ -207,6 +212,9 @@ class Parser {
     std::vector<glm::vec3> m_vertices;
     std::vector<glm::vec3> m_normals;
     std::vector<glm::vec2> m_uvs;
+    std::vector<unsigned int> m_vertex_indices;
+    std::vector<unsigned int> m_texture_indices;
+    std::vector<unsigned int> m_normal_indices;
 
 public:
     Parser(std::string src)
@@ -215,26 +223,76 @@ public:
         m_lexer.next();
     }
 
-    void parse() {
+    auto parse() {
 
-        if (std::holds_alternative<TokenVertex>(m_lexer.peek())) {
-            parse_vertex();
+        while (!std::holds_alternative<TokenInvalid>(m_lexer.peek())) {
+            parse_line();
         }
 
-        if (std::holds_alternative<TokenNormal>(m_lexer.peek())) {
-            parse_normal();
+        std::vector<Vertex> verts;
+
+        for (auto &v : m_vertex_indices) {
+            verts.push_back(m_vertices[v-1]);
         }
 
-        if (std::holds_alternative<TokenTexture>(m_lexer.peek())) {
-            parse_texture();
-        }
+        return verts;
 
     }
 
 private:
+    void parse_line() {
+
+        if (std::holds_alternative<TokenVertex>(m_lexer.peek())) {
+            parse_vertex();
+
+        } else if (std::holds_alternative<TokenNormal>(m_lexer.peek())) {
+            parse_normal();
+
+        } else if (std::holds_alternative<TokenTexture>(m_lexer.peek())) {
+            parse_texture();
+
+        } else if (std::holds_alternative<TokenFace>(m_lexer.peek())) {
+            parse_face();
+
+        } else if (std::holds_alternative<TokenIdent>(m_lexer.peek())) {
+            std::println(stderr, "OBJPARSE: Unsupported Instruction: `{}`", std::get<TokenIdent>(m_lexer.peek()));
+            m_lexer.skip_to_newline();
+        }
+
+        auto nl = m_lexer.next();
+        assert(std::holds_alternative<TokenNewline>(nl));
+
+    }
+
+    void parse_face() {
+        assert(std::holds_alternative<TokenFace>(m_lexer.next()));
+        parse_face_index_triple();
+        parse_face_index_triple();
+        parse_face_index_triple();
+    }
+
+    void parse_face_index_triple() {
+        auto vert_idx = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(vert_idx));
+        m_vertex_indices.push_back(std::get<TokenFloat>(vert_idx));
+
+        if (!std::holds_alternative<TokenSlash>(m_lexer.peek())) return;
+        m_lexer.next();
+
+        auto tex_idx = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(tex_idx));
+        m_texture_indices.push_back(std::get<TokenFloat>(tex_idx));
+
+        if (!std::holds_alternative<TokenSlash>(m_lexer.peek())) return;
+        m_lexer.next();
+
+        auto norm_idx = m_lexer.next();
+        assert(std::holds_alternative<TokenFloat>(norm_idx));
+        m_normal_indices.push_back(std::get<TokenFloat>(norm_idx));
+    }
+
     void parse_texture() {
-        auto tok = m_lexer.next();
-        assert(std::holds_alternative<TokenTexture>(tok));
+        assert(std::holds_alternative<TokenTexture>(m_lexer.next()));
 
         auto u = m_lexer.next();
         assert(std::holds_alternative<TokenFloat>(u));
@@ -242,20 +300,14 @@ private:
         auto v = m_lexer.next();
         assert(std::holds_alternative<TokenFloat>(v));
 
-        auto nl = m_lexer.next();
-        assert(std::holds_alternative<TokenNewline>(nl));
-
-        m_uvs.push_back(
-            {
-                std::get<TokenFloat>(u),
-                std::get<TokenFloat>(v)
-            }
-        );
+        m_uvs.push_back({
+            std::get<TokenFloat>(u),
+            std::get<TokenFloat>(v)
+        });
     }
 
     void parse_normal() {
-        auto tok = m_lexer.next();
-        assert(std::holds_alternative<TokenNormal>(tok));
+        assert(std::holds_alternative<TokenNormal>(m_lexer.next()));
 
         auto x = m_lexer.next();
         assert(std::holds_alternative<TokenFloat>(x));
@@ -266,21 +318,15 @@ private:
         auto z = m_lexer.next();
         assert(std::holds_alternative<TokenFloat>(z));
 
-        auto nl = m_lexer.next();
-        assert(std::holds_alternative<TokenNewline>(nl));
-
-        m_normals.push_back(
-            {
-                std::get<TokenFloat>(x),
-                std::get<TokenFloat>(y),
-                std::get<TokenFloat>(z)
-            }
-        );
+        m_normals.push_back({
+            std::get<TokenFloat>(x),
+            std::get<TokenFloat>(y),
+            std::get<TokenFloat>(z)
+        });
     }
 
     void parse_vertex() {
-        auto tok = m_lexer.next();
-        assert(std::holds_alternative<TokenVertex>(tok));
+        assert(std::holds_alternative<TokenVertex>(m_lexer.next()));
 
         auto x = m_lexer.next();
         assert(std::holds_alternative<TokenFloat>(x));
@@ -291,16 +337,11 @@ private:
         auto z = m_lexer.next();
         assert(std::holds_alternative<TokenFloat>(z));
 
-        auto nl = m_lexer.next();
-        assert(std::holds_alternative<TokenNewline>(nl));
-
-        m_vertices.push_back(
-            {
-                std::get<TokenFloat>(x),
-                std::get<TokenFloat>(y),
-                std::get<TokenFloat>(z)
-            }
-        );
+        m_vertices.push_back({
+            std::get<TokenFloat>(x),
+            std::get<TokenFloat>(y),
+            std::get<TokenFloat>(z)
+        });
 
     }
 

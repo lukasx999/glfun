@@ -229,70 +229,70 @@ int main() {
     //     Vertex({  0.0f,  0.5f, 0.0f })
     // };
 
-    std::array vertices {
-        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 0.0f }),
-        Vertex({  0.5f, -0.5f, -0.5f },  { 1.0f, 0.0f }),
-        Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-        Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-        Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 0.0f }),
-
-        Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-        Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 1.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 1.0f }),
-        Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-
-        Vertex({ -0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-        Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-
-        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-        Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-        Vertex({  0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-        Vertex({  0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-        Vertex({  0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-
-        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-        Vertex({  0.5f, -0.5f, -0.5f },  { 1.0f, 1.0f }),
-        Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
-        Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
-        Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-        Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-
-        Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
-        Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-        Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 0.0f }),
-        Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
-    };
+    // std::array vertices {
+    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 0.0f }),
+    //     Vertex({  0.5f, -0.5f, -0.5f },  { 1.0f, 0.0f }),
+    //     Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+    //     Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+    //     Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
+    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 0.0f }),
+    //
+    //     Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+    //     Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 1.0f }),
+    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 1.0f }),
+    //     Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 1.0f }),
+    //     Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+    //
+    //     Vertex({ -0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //     Vertex({ -0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+    //     Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+    //     Vertex({ -0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //
+    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //     Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+    //     Vertex({  0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+    //     Vertex({  0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+    //     Vertex({  0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //
+    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+    //     Vertex({  0.5f, -0.5f, -0.5f },  { 1.0f, 1.0f }),
+    //     Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //     Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //     Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
+    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
+    //
+    //     Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
+    //     Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
+    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
+    //     Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 0.0f }),
+    //     Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
+    // };
 
     std::array positions {
         glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f),
+        // glm::vec3( 2.0f,  5.0f, -15.0f),
+        // glm::vec3(-1.5f, -2.2f, -2.5f),
+        // glm::vec3(-3.8f, -2.0f, -12.3f),
+        // glm::vec3( 2.4f, -0.4f, -3.5f),
+        // glm::vec3(-1.7f,  3.0f, -7.5f),
+        // glm::vec3( 1.3f, -2.0f, -2.5f),
+        // glm::vec3( 1.5f,  2.0f, -2.5f),
+        // glm::vec3( 1.5f,  0.2f, -1.5f),
+        // glm::vec3(-1.3f,  1.0f, -1.5f),
     };
 
     State state;
 
 
-    std::ifstream file("./assets/cube.obj");
+    std::ifstream file("./assets/teapot.obj");
     std::string obj_src((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     Parser parser(obj_src);
-    parser.parse();
+    auto vertices = parser.parse();
 
     // auto cow = parse_obj("./assets/cube.obj");
 
