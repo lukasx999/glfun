@@ -1,6 +1,5 @@
 #pragma once
 
-#include "vertex.hh"
 #include <cstdlib>
 #include <functional>
 #include <print>
@@ -12,6 +11,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
+#include "vertex.hh"
+
 class TokenVertex { };
 class TokenNormal { };
 class TokenTexture { };
@@ -22,7 +23,17 @@ class TokenSlash { };
 class TokenNewline { };
 class TokenInvalid { };
 
-using Token = std::variant<TokenVertex, TokenNormal, TokenTexture, TokenFace, TokenFloat, TokenIdent, TokenSlash, TokenNewline, TokenInvalid>;
+using Token = std::variant<
+    TokenVertex,
+    TokenNormal,
+    TokenTexture,
+    TokenFace,
+    TokenFloat,
+    TokenIdent,
+    TokenSlash,
+    TokenNewline,
+    TokenInvalid
+>;
 
 template <>
 struct std::formatter<Token> : std::formatter<std::string> {
@@ -87,10 +98,6 @@ public:
     void skip_to_newline() {
         read_while([](char c) { return c != '\n'; });
         next();
-    }
-
-    [[nodiscard]] bool is_at_end() const {
-        return m_src.eof();
     }
 
 private:
