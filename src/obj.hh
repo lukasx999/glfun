@@ -217,6 +217,7 @@ class Parser {
     std::vector<unsigned int> m_normal_indices;
 
 public:
+
     Parser(std::string src)
     : m_lexer(std::move(src))
     {
