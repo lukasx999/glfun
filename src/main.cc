@@ -340,8 +340,8 @@ int main() {
         va.add<float>(pos, 3)
           .add<float>(uv, 2);
 
-        float dt = 0.0f;
-        float last_frame = 0.0f;
+        double dt = 0.0f;
+        double last_frame = 0.0f;
 
         glfwSetWindowUserPointer(window, &state);
 
@@ -373,22 +373,23 @@ int main() {
 
         while (!glfwWindowShouldClose(window)) {
 
-            dt = glfwGetTime() - last_frame;
-            last_frame = glfwGetTime();
+            double time = glfwGetTime();
+            dt = time - last_frame;
+            last_frame = time;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             auto u_view = state.cam.get_view_matrix();
 
             float aspect_ratio = static_cast<float>(WIDTH) / HEIGHT;
-            auto u_projection = glm::perspective(glm::radians(state.fov_deg), aspect_ratio, 0.1f, 100.0f);
+            auto u_proj = glm::perspective(glm::radians(state.fov_deg), aspect_ratio, 0.1f, 100.0f);
 
             for (auto &pos : positions) {
 
                 glm::mat4 u_model(1.0f);
                 u_model = glm::translate(u_model, pos);
 
-                auto u_mvp = u_projection * u_view * u_model;
+                auto u_mvp = u_proj * u_view * u_model;
                 shader.set_uniform("u_mvp", u_mvp);
 
                 texture.bind();
