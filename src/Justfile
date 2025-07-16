@@ -1,5 +1,5 @@
 configure:
-    cmake build
+    cmake -B build
 
 build: configure
     cmake --build build
