@@ -12,9 +12,10 @@ project(GLFun)
 include_directories(lib)
 
 include_directories(imgui)
-include_directories(./imgui/misc/cpp)
-file(GLOB imgui ./imgui/*.cpp)
-list(APPEND imgui ./imgui/backends/imgui_impl_opengl3.cpp ./imgui/backends/imgui_impl_glfw.cpp ./imgui/misc/cpp/imgui_stdlib.cpp)
+include_directories(imgui/backends)
+include_directories(imgui/misc/cpp)
+file(GLOB imgui imgui/*.cpp)
+list(APPEND imgui imgui/backends/imgui_impl_opengl3.cpp imgui/backends/imgui_impl_glfw.cpp imgui/misc/cpp/imgui_stdlib.cpp)
 
 add_executable(glfun main.cc vertex.cc shader.cc texture.cc impl.cc ${imgui})
 target_link_libraries(glfun glfw)

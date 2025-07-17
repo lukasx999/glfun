@@ -27,6 +27,10 @@
 
 #include "glad/gl.h"
 
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
+
 
 #define PRINT(x) std::println("{}: {}", #x, x)
 
@@ -43,7 +47,7 @@ struct State {
     bool polygon_mode = false;
 };
 
-[[nodiscard]] static GLFWwindow *setup_glfw() {
+[[nodiscard]] static GLFWwindow* setup_glfw() {
 
     glfwSetErrorCallback([]([[maybe_unused]] int error_code, const char* description) {
         std::println(stderr, "GLFW Error: {}", description);
@@ -65,7 +69,7 @@ struct State {
     gladLoadGL(glfwGetProcAddress);
 
     glfwSetFramebufferSizeCallback(
-        window, []([[maybe_unused]] GLFWwindow *win, int w, int h) {
+        window, []([[maybe_unused]] GLFWwindow* win, int w, int h) {
             glViewport(0, 0, w, h);
         }
     );
@@ -75,7 +79,7 @@ struct State {
 
 using GLFWKey = int;
 
-[[nodiscard]] static bool is_key_rising(GLFWwindow *window, GLFWKey key) {
+[[nodiscard]] static bool is_key_rising(GLFWwindow* window, GLFWKey key) {
     static bool old = false;
     bool pressed = glfwGetKey(window, key) == GLFW_PRESS;
     bool ret = !old && pressed;
@@ -83,11 +87,11 @@ using GLFWKey = int;
     return ret;
 }
 
-[[nodiscard]] static bool is_key_down(GLFWwindow *window, GLFWKey key) {
+[[nodiscard]] static bool is_key_down(GLFWwindow* window, GLFWKey key) {
     return glfwGetKey(window, key) == GLFW_PRESS;
 }
 
-static void process_inputs(GLFWwindow *window, State &state, float dt) {
+static void process_inputs(GLFWwindow* window, State& state, float dt) {
 
     if (is_key_rising(window, GLFW_KEY_E)) {
         state.polygon_mode = !state.polygon_mode;
@@ -105,7 +109,7 @@ static void process_inputs(GLFWwindow *window, State &state, float dt) {
 
 }
 
-[[nodiscard]] auto glstr_to_cstr(const GLubyte *glstr) {
+[[nodiscard]] auto glstr_to_cstr(const GLubyte* glstr) {
     return reinterpret_cast<const char*>(glstr);
 }
 
@@ -115,80 +119,6 @@ void print_useful_info() {
     std::println("renderer: {}", glstr_to_cstr(glGetString(GL_RENDERER)));
     std::println("shading language version: {}", glstr_to_cstr(glGetString(GL_SHADING_LANGUAGE_VERSION)));
     std::println();
-}
-
-[[nodiscard]] static std::vector<Vertex> parse_obj(const char *filename) {
-    std::ifstream file(filename);
-    std::string obj((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
-
-    std::vector<glm::vec3> tmp_vertices;
-    std::vector<glm::vec2> tmp_uv;
-    std::vector<glm::vec3> tmp_normal;
-    std::vector<unsigned int> vertex_idx, uv_idx, norm_idx;
-
-    std::istringstream stream(obj);
-
-    std::string line;
-    while (std::getline(stream, line)) {
-
-        std::smatch matches;
-        const std::string re_num(R"([0-9]+)");
-        const std::string re_idx(std::format(R"(({0})/({0})/({0}))", re_num));
-        const std::string re_comment(R"(\s*#?.*$)");
-        const std::string re_float(R"([+-]?[0-9]*\.?[0-9]*)");
-        const std::regex re_vertex(std::format(R"(v\s+({0})\s+({0})\s+({0}){1})", re_float, re_comment));
-        const std::regex re_tex(std::format(R"(vt\s+({0})\s+({0}){1})", re_float, re_comment));
-        const std::regex re_norm(std::format(R"(vn\s+({0})\s+({0})\s+({0}){1})", re_float, re_comment));
-        const std::regex re_face(std::format(R"(f\s+{0}\s+{0}\s+{0}{1})", re_idx, re_comment));
-        const std::regex re_face_vertex(std::format(R"(f\s+({0})\s+({0})\s+({0}){1})", re_num, re_comment));
-
-        if (std::regex_match(line, matches, re_vertex)) {
-            float x = stof(matches.str(1));
-            float y = stof(matches.str(2));
-            float z = stof(matches.str(3));
-            tmp_vertices.push_back({ x, y, z });
-
-        } else if (std::regex_match(line, matches, re_tex)) {
-            float u = stof(matches.str(1));
-            float v = stof(matches.str(2));
-            tmp_uv.push_back({ u, v });
-
-        } else if (std::regex_match(line, matches, re_norm)) {
-            float x = stof(matches.str(1));
-            float y = stof(matches.str(2));
-            float z = stof(matches.str(3));
-            tmp_normal.push_back({ x, y, z });
-
-        } else if (std::regex_match(line, matches, re_face)) {
-            vertex_idx.push_back(stoi(matches.str(1)));
-            uv_idx    .push_back(stoi(matches.str(2)));
-            norm_idx  .push_back(stoi(matches.str(3)));
-            vertex_idx.push_back(stoi(matches.str(4)));
-            uv_idx    .push_back(stoi(matches.str(5)));
-            norm_idx  .push_back(stoi(matches.str(6)));
-            vertex_idx.push_back(stoi(matches.str(7)));
-            uv_idx    .push_back(stoi(matches.str(8)));
-            norm_idx  .push_back(stoi(matches.str(9)));
-
-        } else if (std::regex_match(line, matches, re_face_vertex)) {
-            vertex_idx.push_back(stoi(matches.str(1)));
-            vertex_idx.push_back(stoi(matches.str(2)));
-            vertex_idx.push_back(stoi(matches.str(3)));
-        }
-
-    }
-
-    std::vector<Vertex> verts;
-
-    // for (auto &&[vert, uv, norm] : std::views::zip(vertex_idx, uv_idx, norm_idx)) {
-    //     verts.push_back(Vertex(tmp_vertices[vert-1], tmp_uv[uv-1]));
-    // }
-
-    for (auto &v : vertex_idx) {
-        verts.push_back(tmp_vertices[v-1]);
-    }
-
-    return verts;
 }
 
 [[nodiscard]] constexpr auto gl_debug_type_to_cstr(GLenum type) {
@@ -295,8 +225,17 @@ int main() {
 
     // auto cow = parse_obj("./assets/cube.obj");
 
+
     GLFWwindow *window = setup_glfw();
     {
+
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init();
 
         glDebugMessageCallback([](
             [[maybe_unused]] GLenum src,
@@ -359,19 +298,24 @@ int main() {
             old = now;
         });
 
-        glfwSetScrollCallback(window, [](GLFWwindow *win, [[maybe_unused]] double x, double y) {
+        glfwSetScrollCallback(window, [](GLFWwindow* win, [[maybe_unused]] double x, double y) {
             float scroll_factor = 10.0f;
             float max_fov = 90.0f;
 
-            auto *state_ptr = static_cast<State*>(glfwGetWindowUserPointer(win));
+            auto* state_ptr = static_cast<State*>(glfwGetWindowUserPointer(win));
             assert(state_ptr != nullptr);
-            auto &state = *state_ptr;
+            auto& state = *state_ptr;
 
             state.fov_deg -= y * scroll_factor;
             state.fov_deg = std::clamp(state.fov_deg, 1.0f, max_fov);
         });
 
         while (!glfwWindowShouldClose(window)) {
+
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            ImGui::ShowDemoWindow();
 
             double time = glfwGetTime();
             dt = time - last_frame;
@@ -384,7 +328,7 @@ int main() {
             float aspect_ratio = static_cast<float>(WIDTH) / HEIGHT;
             auto u_proj = glm::perspective(glm::radians(state.fov_deg), aspect_ratio, 0.1f, 100.0f);
 
-            for (auto &pos : positions) {
+            for (auto& pos : positions) {
 
                 glm::mat4 u_model(1.0f);
                 u_model = glm::translate(u_model, pos);
@@ -400,12 +344,20 @@ int main() {
 
             }
 
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
             process_inputs(window, state, dt);
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
 
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
     }
+
 
     glfwDestroyWindow(window);
     glfwTerminate();
