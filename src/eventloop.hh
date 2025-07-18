@@ -6,8 +6,6 @@
 
 #include "glad/gl.h"
 
-
-
 class EventLoop {
     GLFWwindow* m_window;
     double m_dt = 0.0f;

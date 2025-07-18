@@ -218,12 +218,12 @@ int main() {
 
         setup_gl();
 
-        // IMGUI_CHECKVERSION();
-        // ImGui::CreateContext();
-        // ImGuiIO& io = ImGui::GetIO();
-        // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-        // ImGui_ImplGlfw_InitForOpenGL(window, true);
-        // ImGui_ImplOpenGL3_Init();
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init();
 
         Texture texture(GL_TEXTURE0, "./backpack/diffuse.jpg", false, GL_RGB);
 
@@ -234,27 +234,28 @@ int main() {
         Renderer rd(vertices);
 
         auto callback = [&](GLFWwindow* window, double dt) {
+
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            ImGui::ShowDemoWindow();
+
             rd.render(texture, state, { 0.0f,  0.0f,  0.0f });
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
             process_inputs(window, state, dt);
         };
 
         EventLoop ev(window, callback);
         ev.run();
 
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
     });
-
-    // ImGui_ImplOpenGL3_NewFrame();
-    // ImGui_ImplGlfw_NewFrame();
-    // ImGui::NewFrame();
-    // ImGui::ShowDemoWindow();
-
-    // ImGui::Render();
-    // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    // ImGui_ImplOpenGL3_Shutdown();
-    // ImGui_ImplGlfw_Shutdown();
-    // ImGui::DestroyContext();
-
 
     return EXIT_SUCCESS;
 }
