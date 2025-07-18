@@ -13,10 +13,10 @@
 
 class VertexArray {
     GLuint m_id;
-    size_t m_offset;
+    size_t m_offset = 0;
 
 public:
-    VertexArray() : m_offset(0) {
+    VertexArray() {
         glGenVertexArrays(1, &m_id);
     }
 
@@ -24,12 +24,15 @@ public:
         glDeleteVertexArrays(1, &m_id);
     }
 
-    VertexArray &bind() {
+    VertexArray(VertexArray const&) = delete;
+    VertexArray& operator=(VertexArray const&) = delete;
+
+    VertexArray& bind() {
         glBindVertexArray(m_id);
         return *this;
     }
 
-    VertexArray &unbind() {
+    VertexArray& unbind() {
         glBindVertexArray(0);
         return *this;
     }
@@ -41,14 +44,8 @@ private:
     void add_attr(GLuint location, GLint components, GLenum type, size_t elem_size) {
         bind();
 
-        glVertexAttribPointer(
-            location,
-            components,
-            type,
-            false,
-            sizeof(Vertex),
-            reinterpret_cast<void*>(m_offset)
-        );
+        glVertexAttribPointer(location, components, type, false, sizeof(Vertex),
+                              reinterpret_cast<void*>(m_offset));
 
         glEnableVertexAttribArray(location);
         m_offset += elem_size * components;
@@ -57,7 +54,7 @@ private:
 };
 
 template <>
-inline VertexArray &VertexArray::add<float>(GLuint location, GLint components) {
+inline VertexArray& VertexArray::add<float>(GLuint location, GLint components) {
     add_attr(location, components, GL_FLOAT, sizeof(float));
     return *this;
 }

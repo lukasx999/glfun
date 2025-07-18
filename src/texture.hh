@@ -22,12 +22,12 @@ class Texture {
 
 public:
     // unit: GL_TEXTUREn
-    Texture(GLenum unit, const char *filename, bool flip_vert, GLenum format);
-    Texture(GLenum unit, const char *filename, bool flip_vert, GLenum format, int resize_width, int resize_height);
-    Texture &bind();
+    Texture(GLenum unit, char const* filename, bool flip_vert, GLenum format);
+    Texture(GLenum unit, char const* filename, bool flip_vert, GLenum format, int resize_width, int resize_height);
+    Texture& bind();
 
 private:
-    using StbiDeleter = decltype([](uint8_t *data) { stbi_image_free(data); });
+    using StbiDeleter = decltype([](uint8_t* data) { stbi_image_free(data); });
     using StbiData = std::unique_ptr<uint8_t, StbiDeleter>;
     using ImageData = std::tuple<StbiData, int, int>;
 

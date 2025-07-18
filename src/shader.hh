@@ -17,11 +17,13 @@ class Shader {
 
 public:
     Shader(const char *filename_vert, const char *filename_frag);
+
     ~Shader();
+    Shader(Shader const&) = delete;
+    Shader& operator=(Shader const&) = delete;
 
     Shader &use();
     [[nodiscard]] GLuint get_attrib_loc(const char *name) const;
-    // make sure to use() before setting uniforms
     Shader &set_uniform(const char *name, int value);
     Shader &set_uniform(const char *name, float value);
     Shader &set_uniform(const char *name, glm::vec3 value);

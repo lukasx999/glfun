@@ -24,6 +24,7 @@
 #include "shader.hh"
 #include "texture.hh"
 #include "camera.hh"
+#include "renderer.hh"
 
 #include "glad/gl.h"
 
@@ -32,20 +33,10 @@
 #include <imgui_impl_glfw.h>
 
 
-#define PRINT(x) std::println("{}: {}", #x, x)
 
 
 
-static constexpr int WIDTH  = 1600;
-static constexpr int HEIGHT = 900;
-static constexpr auto SHADER_VERT = "shader.vert";
-static constexpr auto SHADER_FRAG = "shader.frag";
 
-struct State {
-    Camera cam { { 0.0f, 0.0f, 3.0f } };
-    float fov_deg = 45.0f;
-    bool polygon_mode = false;
-};
 
 [[nodiscard]] static GLFWwindow* setup_glfw() {
 
@@ -158,70 +149,8 @@ static void with_opengl_context(std::function<void(GLFWwindow*)> fn) {
     glfwTerminate();
 }
 
+
 int main() {
-
-    // std::array vertices {
-    //     Vertex({ -0.5f, -0.5f, 0.0f }),
-    //     Vertex({  0.5f, -0.5f, 0.0f }),
-    //     Vertex({  0.0f,  0.5f, 0.0f })
-    // };
-
-    // std::array vertices {
-    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 0.0f }),
-    //     Vertex({  0.5f, -0.5f, -0.5f },  { 1.0f, 0.0f }),
-    //     Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-    //     Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-    //     Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
-    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 0.0f }),
-    //
-    //     Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-    //     Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 1.0f }),
-    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 1.0f }),
-    //     Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 1.0f }),
-    //     Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-    //
-    //     Vertex({ -0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //     Vertex({ -0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-    //     Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-    //     Vertex({ -0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //
-    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //     Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-    //     Vertex({  0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-    //     Vertex({  0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-    //     Vertex({  0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //
-    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-    //     Vertex({  0.5f, -0.5f, -0.5f },  { 1.0f, 1.0f }),
-    //     Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //     Vertex({  0.5f, -0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //     Vertex({ -0.5f, -0.5f,  0.5f },  { 0.0f, 0.0f }),
-    //     Vertex({ -0.5f, -0.5f, -0.5f },  { 0.0f, 1.0f }),
-    //
-    //     Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
-    //     Vertex({  0.5f,  0.5f, -0.5f },  { 1.0f, 1.0f }),
-    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //     Vertex({  0.5f,  0.5f,  0.5f },  { 1.0f, 0.0f }),
-    //     Vertex({ -0.5f,  0.5f,  0.5f },  { 0.0f, 0.0f }),
-    //     Vertex({ -0.5f,  0.5f, -0.5f },  { 0.0f, 1.0f }),
-    // };
-
-    std::array positions {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        // glm::vec3( 2.0f,  5.0f, -15.0f),
-        // glm::vec3(-1.5f, -2.2f, -2.5f),
-        // glm::vec3(-3.8f, -2.0f, -12.3f),
-        // glm::vec3( 2.4f, -0.4f, -3.5f),
-        // glm::vec3(-1.7f,  3.0f, -7.5f),
-        // glm::vec3( 1.3f, -2.0f, -2.5f),
-        // glm::vec3( 1.5f,  2.0f, -2.5f),
-        // glm::vec3( 1.5f,  0.2f, -1.5f),
-        // glm::vec3(-1.3f,  1.0f, -1.5f),
-    };
 
     State state;
 
@@ -232,13 +161,12 @@ int main() {
 
     with_opengl_context([&](GLFWwindow* window) {
 
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init();
+        // IMGUI_CHECKVERSION();
+        // ImGui::CreateContext();
+        // ImGuiIO& io = ImGui::GetIO();
+        // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        // ImGui_ImplGlfw_InitForOpenGL(window, true);
+        // ImGui_ImplOpenGL3_Init();
 
         glDebugMessageCallback([](
             [[maybe_unused]] GLenum src,
@@ -266,21 +194,8 @@ int main() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        VertexBuffer vb(vertices);
-
-        Shader shader(SHADER_VERT, SHADER_FRAG);
-        shader.use()
-            .set_uniform("tex", 0);
-
         // Texture texture(GL_TEXTURE0, "./assets/awesomeface.png", false, GL_RGBA);
         Texture texture(GL_TEXTURE0, "./backpack/diffuse.jpg", false, GL_RGB);
-
-        GLuint pos = shader.get_attrib_loc("a_pos");
-        GLuint uv  = shader.get_attrib_loc("a_uv");
-
-        VertexArray va;
-        va.add<float>(pos, 3)
-          .add<float>(uv, 2);
 
         double dt = 0.0f;
         double last_frame = 0.0f;
@@ -313,12 +228,14 @@ int main() {
             state.fov_deg = std::clamp(state.fov_deg, 1.0f, max_fov);
         });
 
+        Renderer rd(vertices);
+
         while (!glfwWindowShouldClose(window)) {
 
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-            ImGui::ShowDemoWindow();
+            // ImGui_ImplOpenGL3_NewFrame();
+            // ImGui_ImplGlfw_NewFrame();
+            // ImGui::NewFrame();
+            // ImGui::ShowDemoWindow();
 
             double time = glfwGetTime();
             dt = time - last_frame;
@@ -326,38 +243,19 @@ int main() {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            auto u_view = state.cam.get_view_matrix();
+            rd.render(texture, state, { 0.0f,  0.0f,  0.0f });
 
-            float aspect_ratio = static_cast<float>(WIDTH) / HEIGHT;
-            auto u_proj = glm::perspective(glm::radians(state.fov_deg), aspect_ratio, 0.1f, 100.0f);
-
-            for (auto& pos : positions) {
-
-                glm::mat4 u_model(1.0f);
-                u_model = glm::translate(u_model, pos);
-
-                auto u_mvp = u_proj * u_view * u_model;
-                shader.set_uniform("u_mvp", u_mvp);
-
-                texture.bind();
-                shader.use();
-                va.bind();
-
-                glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-
-            }
-
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            // ImGui::Render();
+            // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             process_inputs(window, state, dt);
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
 
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
+        // ImGui_ImplOpenGL3_Shutdown();
+        // ImGui_ImplGlfw_Shutdown();
+        // ImGui::DestroyContext();
 
     });
 
