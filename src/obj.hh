@@ -1,9 +1,11 @@
 #pragma once
 
 #include <cstdlib>
+#include <fstream>
 #include <functional>
 #include <print>
 #include <array>
+#include <iostream>
 #include <ranges>
 #include <sstream>
 #include <variant>
@@ -79,12 +81,12 @@ struct std::formatter<Token> : std::formatter<std::string> {
     }
 };
 
-class Lexer {
+class ObjLexer {
     std::istringstream m_src;
     Token m_tok = TokenInvalid{};
 
 public:
-    Lexer(std::string src)
+    ObjLexer(std::string src)
     : m_src(std::move(src))
     { }
 
@@ -215,8 +217,8 @@ private:
 
 };
 
-class Parser {
-    Lexer m_lexer;
+class ObjParser {
+    ObjLexer m_lexer;
     std::vector<glm::vec3> m_vertices;
     std::vector<glm::vec3> m_normals;
     std::vector<glm::vec2> m_uvs;
@@ -225,7 +227,8 @@ class Parser {
     std::vector<unsigned int> m_normal_indices;
 
 public:
-    Parser(std::string src) : m_lexer(std::move(src))
+    ObjParser(std::string filename)
+    : m_lexer(read_file(std::move(filename)))
     {
         m_lexer.next();
     }
@@ -251,6 +254,14 @@ public:
     }
 
 private:
+    [[nodiscard]] static std::string read_file(std::string filename) {
+        std::ifstream file(filename);
+        std::string contents((std::istreambuf_iterator<char>(file)),
+                             std::istreambuf_iterator<char>());
+        return contents;
+    }
+
+
     void parse_line() {
 
         auto tok = m_lexer.peek();

@@ -14,18 +14,13 @@
 
 class Renderer {
     std::span<const Vertex> m_vertices;
-    Shader m_shader {  "shader.vert",  "shader.frag" };
+    Shader m_shader { "shader.vert",  "shader.frag" };
     VertexArray m_vao;
     VertexBuffer m_vbo { m_vertices };
 
 public:
     Renderer(std::span<const Vertex> vertices) : m_vertices(vertices)
     {
-        setup();
-    }
-
-    void setup() {
-
         m_shader.use();
         m_shader.set_uniform("tex", 0);
 

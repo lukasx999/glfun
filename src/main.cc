@@ -21,6 +21,7 @@
 #include "vertexarray.hh"
 #include "vertexbuffer.hh"
 #include "indexbuffer.hh"
+#include "eventloop.hh"
 #include "shader.hh"
 #include "texture.hh"
 #include "camera.hh"
@@ -104,7 +105,7 @@ static void process_inputs(GLFWwindow* window, State& state, float dt) {
     return reinterpret_cast<const char*>(glstr);
 }
 
-void print_useful_info() {
+static void print_useful_info() {
     std::println("vendor: {}", glstr_to_cstr(glGetString(GL_VENDOR)));
     std::println("version: {}", glstr_to_cstr(glGetString(GL_VERSION)));
     std::println("renderer: {}", glstr_to_cstr(glGetString(GL_RENDERER)));
@@ -112,7 +113,7 @@ void print_useful_info() {
     std::println();
 }
 
-[[nodiscard]] constexpr auto gl_debug_type_to_cstr(GLenum type) {
+[[nodiscard]] static constexpr auto gl_debug_type_to_cstr(GLenum type) {
     switch (type) {
         case GL_DEBUG_TYPE_ERROR:
             return "ERROR";
@@ -130,7 +131,7 @@ void print_useful_info() {
     std::unreachable();
 }
 
-[[nodiscard]] constexpr auto gl_debug_severity_to_cstr(GLenum severity) {
+[[nodiscard]] static constexpr auto gl_debug_severity_to_cstr(GLenum severity) {
     switch (severity) {
         case GL_DEBUG_SEVERITY_LOW:
             return "LOW";
@@ -149,17 +150,73 @@ static void with_opengl_context(std::function<void(GLFWwindow*)> fn) {
     glfwTerminate();
 }
 
+static void debug_message_callback(
+    [[maybe_unused]] GLenum src,
+    [[maybe_unused]] GLenum type,
+    [[maybe_unused]] GLuint id,
+    [[maybe_unused]] GLenum severity,
+    [[maybe_unused]] GLsizei len,
+    const char *msg,
+    [[maybe_unused]] const void *args
+) {
+
+    std::println(stderr, "> OpenGL Error:");
+    std::println(stderr, "Type: {}", gl_debug_type_to_cstr(type));
+    std::println(stderr, "Severity: {}", gl_debug_severity_to_cstr(severity));
+    std::println(stderr, "Message: {}", msg);
+    std::println(stderr);
+}
+
+static void cursor_pos_callback(GLFWwindow *win, double x, double y) {
+    static glm::vec2 old(0.0f);
+
+    auto *state_ptr = static_cast<State*>(glfwGetWindowUserPointer(win));
+    assert(state_ptr != nullptr);
+    auto &state = *state_ptr;
+
+    glm::vec2 now(x, y);
+
+    auto delta = now - old;
+    state.cam.rotate(delta);
+    old = now;
+}
+
+static void scroll_callback(GLFWwindow* win, [[maybe_unused]] double x, double y) {
+    float scroll_factor = 10.0f;
+    float max_fov = 90.0f;
+
+    auto* state_ptr = static_cast<State*>(glfwGetWindowUserPointer(win));
+    assert(state_ptr != nullptr);
+    auto& state = *state_ptr;
+
+    state.fov_deg -= y * scroll_factor;
+    state.fov_deg = std::clamp(state.fov_deg, 1.0f, max_fov);
+}
+
+static void setup_gl() {
+
+    glDebugMessageCallback(debug_message_callback, nullptr);
+    print_useful_info();
+
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
 
 int main() {
 
     State state;
 
-    std::ifstream file("./backpack/backpack.obj");
-    std::string obj_src((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    Parser parser(obj_src);
+    ObjParser parser("./backpack/backpack.obj");
     auto vertices = parser.parse();
 
     with_opengl_context([&](GLFWwindow* window) {
+
+        setup_gl();
 
         // IMGUI_CHECKVERSION();
         // ImGui::CreateContext();
@@ -168,96 +225,35 @@ int main() {
         // ImGui_ImplGlfw_InitForOpenGL(window, true);
         // ImGui_ImplOpenGL3_Init();
 
-        glDebugMessageCallback([](
-            [[maybe_unused]] GLenum src,
-            [[maybe_unused]] GLenum type,
-            [[maybe_unused]] GLuint id,
-            [[maybe_unused]] GLenum severity,
-            [[maybe_unused]] GLsizei len,
-            const char *msg,
-            [[maybe_unused]] const void *args
-        ) {
-                               std::println(stderr, "> OpenGL Error:");
-                               std::println(stderr, "Type: {}", gl_debug_type_to_cstr(type));
-                               std::println(stderr, "Severity: {}", gl_debug_severity_to_cstr(severity));
-                               std::println(stderr, "Message: {}", msg);
-                               std::println(stderr);
-                               }, nullptr);
-
-        print_useful_info();
-
-        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        // Texture texture(GL_TEXTURE0, "./assets/awesomeface.png", false, GL_RGBA);
         Texture texture(GL_TEXTURE0, "./backpack/diffuse.jpg", false, GL_RGB);
 
-        double dt = 0.0f;
-        double last_frame = 0.0f;
-
         glfwSetWindowUserPointer(window, &state);
-
-        glfwSetCursorPosCallback(window, [](GLFWwindow *win, double x, double y) {
-            static glm::vec2 old(0.0f);
-
-            auto *state_ptr = static_cast<State*>(glfwGetWindowUserPointer(win));
-            assert(state_ptr != nullptr);
-            auto &state = *state_ptr;
-
-            glm::vec2 now(x, y);
-
-            auto delta = now - old;
-            state.cam.rotate(delta);
-            old = now;
-        });
-
-        glfwSetScrollCallback(window, [](GLFWwindow* win, [[maybe_unused]] double x, double y) {
-            float scroll_factor = 10.0f;
-            float max_fov = 90.0f;
-
-            auto* state_ptr = static_cast<State*>(glfwGetWindowUserPointer(win));
-            assert(state_ptr != nullptr);
-            auto& state = *state_ptr;
-
-            state.fov_deg -= y * scroll_factor;
-            state.fov_deg = std::clamp(state.fov_deg, 1.0f, max_fov);
-        });
+        glfwSetCursorPosCallback(window, cursor_pos_callback);
+        glfwSetScrollCallback(window, scroll_callback);
 
         Renderer rd(vertices);
 
-        while (!glfwWindowShouldClose(window)) {
-
-            // ImGui_ImplOpenGL3_NewFrame();
-            // ImGui_ImplGlfw_NewFrame();
-            // ImGui::NewFrame();
-            // ImGui::ShowDemoWindow();
-
-            double time = glfwGetTime();
-            dt = time - last_frame;
-            last_frame = time;
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        auto callback = [&](GLFWwindow* window, double dt) {
             rd.render(texture, state, { 0.0f,  0.0f,  0.0f });
-
-            // ImGui::Render();
-            // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
             process_inputs(window, state, dt);
-            glfwSwapBuffers(window);
-            glfwPollEvents();
-        }
+        };
 
-        // ImGui_ImplOpenGL3_Shutdown();
-        // ImGui_ImplGlfw_Shutdown();
-        // ImGui::DestroyContext();
+        EventLoop ev(window, callback);
+        ev.run();
 
     });
+
+    // ImGui_ImplOpenGL3_NewFrame();
+    // ImGui_ImplGlfw_NewFrame();
+    // ImGui::NewFrame();
+    // ImGui::ShowDemoWindow();
+
+    // ImGui::Render();
+    // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    // ImGui_ImplOpenGL3_Shutdown();
+    // ImGui_ImplGlfw_Shutdown();
+    // ImGui::DestroyContext();
 
 
     return EXIT_SUCCESS;
