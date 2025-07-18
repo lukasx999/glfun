@@ -151,6 +151,13 @@ void print_useful_info() {
     std::unreachable();
 }
 
+static void with_opengl_context(std::function<void(GLFWwindow*)> fn) {
+    GLFWwindow *window = setup_glfw();
+    fn(window);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
 int main() {
 
     // std::array vertices {
@@ -225,9 +232,7 @@ int main() {
 
     // auto cow = parse_obj("./assets/cube.obj");
 
-
-    GLFWwindow *window = setup_glfw();
-    {
+    with_opengl_context([&](GLFWwindow* window) {
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -246,12 +251,12 @@ int main() {
             const char *msg,
             [[maybe_unused]] const void *args
         ) {
-            std::println(stderr, "> OpenGL Error:");
-            std::println(stderr, "Type: {}", gl_debug_type_to_cstr(type));
-            std::println(stderr, "Severity: {}", gl_debug_severity_to_cstr(severity));
-            std::println(stderr, "Message: {}", msg);
-            std::println(stderr);
-        }, nullptr);
+                               std::println(stderr, "> OpenGL Error:");
+                               std::println(stderr, "Type: {}", gl_debug_type_to_cstr(type));
+                               std::println(stderr, "Severity: {}", gl_debug_severity_to_cstr(severity));
+                               std::println(stderr, "Message: {}", msg);
+                               std::println(stderr);
+                               }, nullptr);
 
         print_useful_info();
 
@@ -267,7 +272,7 @@ int main() {
 
         Shader shader(SHADER_VERT, SHADER_FRAG);
         shader.use()
-              .set_uniform("tex", 0);
+            .set_uniform("tex", 0);
 
         // Texture texture(GL_TEXTURE0, "./assets/awesomeface.png", false, GL_RGBA);
         Texture texture(GL_TEXTURE0, "./backpack/diffuse.jpg", false, GL_RGB);
@@ -356,10 +361,8 @@ int main() {
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 
-    }
+    });
 
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
     return EXIT_SUCCESS;
 }
