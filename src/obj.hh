@@ -133,8 +133,8 @@ private:
                 auto ident = read_while(isalpha);
                 auto num = tokenize_float();
 
-                if (ident.has_value()) {
-                    auto str = ident.value();
+                if (ident) {
+                    auto str = *ident;
 
                     if (str == "v")
                         return TokenVertex();
@@ -151,8 +151,8 @@ private:
                     else
                         return str;
 
-                } else if (num.has_value()) {
-                    return num.value();
+                } else if (num) {
+                    return *num;
                 }
 
                 return TokenInvalid{};
@@ -180,14 +180,14 @@ private:
             m_src.ignore();
             num2 = read_while(isdigit);
 
-            if (!num2.has_value())
+            if (!num2)
                 return { };
         }
 
-        auto str = num.value();
+        auto str = *num;
 
-        if (num2.has_value())
-            str += '.' + num2.value();
+        if (num2)
+            str += '.' + *num2;
 
         if (is_negative)
             str.insert(str.begin(), '-');
