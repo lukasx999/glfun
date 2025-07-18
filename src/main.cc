@@ -101,18 +101,6 @@ static void process_inputs(GLFWwindow* window, State& state, float dt) {
 
 }
 
-[[nodiscard]] auto glstr_to_cstr(const GLubyte* glstr) {
-    return reinterpret_cast<const char*>(glstr);
-}
-
-static void print_useful_info() {
-    std::println("vendor: {}", glstr_to_cstr(glGetString(GL_VENDOR)));
-    std::println("version: {}", glstr_to_cstr(glGetString(GL_VERSION)));
-    std::println("renderer: {}", glstr_to_cstr(glGetString(GL_RENDERER)));
-    std::println("shading language version: {}", glstr_to_cstr(glGetString(GL_SHADING_LANGUAGE_VERSION)));
-    std::println();
-}
-
 [[nodiscard]] static constexpr auto gl_debug_type_to_cstr(GLenum type) {
     switch (type) {
         case GL_DEBUG_TYPE_ERROR:
@@ -196,7 +184,6 @@ static void scroll_callback(GLFWwindow* win, [[maybe_unused]] double x, double y
 static void setup_gl() {
 
     glDebugMessageCallback(debug_message_callback, nullptr);
-    print_useful_info();
 
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_DEPTH_TEST);
