@@ -230,8 +230,6 @@ int main() {
     Parser parser(obj_src);
     auto vertices = parser.parse();
 
-    // auto cow = parse_obj("./assets/cube.obj");
-
     with_opengl_context([&](GLFWwindow* window) {
 
         IMGUI_CHECKVERSION();
